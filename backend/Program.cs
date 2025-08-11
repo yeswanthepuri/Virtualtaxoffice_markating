@@ -57,7 +57,7 @@ builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("http://localhost:4200", "https://vto.marthand.org", "http://localhost:8081")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials());
@@ -86,6 +86,10 @@ using (var scope = app.Services.CreateScope())
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Add a simple health check endpoint
+app.MapGet("/api/health", () => "Backend is running!");
+
 app.MapControllers();
 
 app.Run();

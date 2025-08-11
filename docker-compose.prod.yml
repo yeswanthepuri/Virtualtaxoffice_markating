@@ -4,20 +4,15 @@ services:
   frontend:
     build:
       context: ./frontend
-      args:
-        - BUILD_COMMAND=npm run build:prod
     ports:
       - "8081:80"
     depends_on:
       - backend
-    command: nginx -g 'daemon off;'
     restart: unless-stopped
 
   backend:
     build:
       context: ./backend
-      args:
-        - BUILD_COMMAND=dotnet publish -c Release -o out
     ports:
       - "3000:3000"
     depends_on:
@@ -30,7 +25,16 @@ services:
       - MinIO__SecretKey=minioadmin
       - MinIO__BucketName=uploads
       - ASPNETCORE_ENVIRONMENT=Production
-    command: dotnet out/YourApp.dll
+      - ASPNETCORE_URLS=http://+:3000
+      - Jwt__Key=your-super-secret-jwt-key-here
+      - Jwt__Issuer=https://vtobackend.marthand.org
+      - Jwt__Audience=https://vtobackend.marthand.org
+      - API_BASE_URL=https://vtobackend.marthand.org
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     restart: unless-stopped
 
   database:
