@@ -86,21 +86,41 @@ using (var scope = app.Services.CreateScope())
             throw new Exception("Cannot connect to database");
         }
         
-        Console.WriteLine("Applying migrations...");
+        Console.WriteLine("Checking migrations...");
         
-        // Apply migrations
-        var appPendingMigrations = appContext.Database.GetPendingMigrations();
+        // Check AppDbContext migrations
+        var appPendingMigrations = appContext.Database.GetPendingMigrations().ToList();
+        var appAppliedMigrations = appContext.Database.GetAppliedMigrations().ToList();
+        Console.WriteLine($"AppDbContext - Applied: {appAppliedMigrations.Count}, Pending: {appPendingMigrations.Count}");
+        
         if (appPendingMigrations.Any())
         {
-            Console.WriteLine($"Applying {appPendingMigrations.Count()} app migrations");
+            Console.WriteLine($"Applying {appPendingMigrations.Count} app migrations: {string.Join(", ", appPendingMigrations)}");
             appContext.Database.Migrate();
         }
         
-        var identityPendingMigrations = identityContext.Database.GetPendingMigrations();
+        // Check ApplicationDbContext migrations
+        var identityPendingMigrations = identityContext.Database.GetPendingMigrations().ToList();
+        var identityAppliedMigrations = identityContext.Database.GetAppliedMigrations().ToList();
+        Console.WriteLine($"ApplicationDbContext - Applied: {identityAppliedMigrations.Count}, Pending: {identityPendingMigrations.Count}");
+        
         if (identityPendingMigrations.Any())
         {
-            Console.WriteLine($"Applying {identityPendingMigrations.Count()} identity migrations");
+            Console.WriteLine($"Applying {identityPendingMigrations.Count} identity migrations: {string.Join(", ", identityPendingMigrations)}");
             identityContext.Database.Migrate();
+        }
+        else
+        {
+            Console.WriteLine("No pending identity migrations found. Checking if tables exist...");
+            var tablesExist = identityContext.Database.CanConnect() && 
+                             identityContext.Database.SqlQueryRaw<int>("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'AspNetRoles'").FirstOrDefault() > 0;
+            Console.WriteLine($"AspNetRoles table exists: {tablesExist}");
+            
+            if (!tablesExist)
+            {
+                Console.WriteLine("Identity tables don't exist. Creating database...");
+                identityContext.Database.EnsureCreated();
+            }
         }
         
         Console.WriteLine("Migrations applied successfully");
