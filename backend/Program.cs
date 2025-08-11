@@ -138,14 +138,17 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // Add a simple health check endpoint
-app.MapGet("/api/health", async (AppDbContext appContext, ApplicationDbContext identityContext) => 
+app.MapGet("/api/health", async (HttpContext context) => 
 {
     try
     {
+        var appContext = context.RequestServices.GetRequiredService<AppDbContext>();
+        var identityContext = context.RequestServices.GetRequiredService<ApplicationDbContext>();
+        
         var canConnectApp = await appContext.Database.CanConnectAsync();
         var canConnectIdentity = await identityContext.Database.CanConnectAsync();
         
-        return new { 
+        var result = new { 
             status = "healthy", 
             database = new {
                 appContext = canConnectApp ? "connected" : "disconnected",
@@ -153,14 +156,18 @@ app.MapGet("/api/health", async (AppDbContext appContext, ApplicationDbContext i
             },
             timestamp = DateTime.UtcNow
         };
+        
+        await context.Response.WriteAsJsonAsync(result);
     }
     catch (Exception ex)
     {
-        return new { 
+        var result = new { 
             status = "unhealthy", 
             error = ex.Message,
             timestamp = DateTime.UtcNow
         };
+        
+        await context.Response.WriteAsJsonAsync(result);
     }
 });
 

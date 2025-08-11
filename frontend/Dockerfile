@@ -6,8 +6,7 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-ARG CONFIGURATION=development
-RUN npm run build -- --configuration=${CONFIGURATION}
+RUN npm run build
 
 FROM nginx:alpine
 COPY nginx.conf /etc/nginx/nginx.conf
