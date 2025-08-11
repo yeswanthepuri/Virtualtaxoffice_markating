@@ -73,57 +73,13 @@ using (var scope = app.Services.CreateScope())
         var appContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var identityContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         
-        Console.WriteLine("Testing database connection...");
+        Console.WriteLine("Creating databases...");
         
-        // Test connection
-        if (appContext.Database.CanConnect())
-        {
-            Console.WriteLine("Database connection successful");
-        }
-        else
-        {
-            Console.WriteLine("Database connection failed");
-            throw new Exception("Cannot connect to database");
-        }
+        // Create databases
+        appContext.Database.EnsureCreated();
+        identityContext.Database.EnsureCreated();
         
-        Console.WriteLine("Checking migrations...");
-        
-        // Check AppDbContext migrations
-        var appPendingMigrations = appContext.Database.GetPendingMigrations().ToList();
-        var appAppliedMigrations = appContext.Database.GetAppliedMigrations().ToList();
-        Console.WriteLine($"AppDbContext - Applied: {appAppliedMigrations.Count}, Pending: {appPendingMigrations.Count}");
-        
-        if (appPendingMigrations.Any())
-        {
-            Console.WriteLine($"Applying {appPendingMigrations.Count} app migrations: {string.Join(", ", appPendingMigrations)}");
-            appContext.Database.Migrate();
-        }
-        
-        // Check ApplicationDbContext migrations
-        var identityPendingMigrations = identityContext.Database.GetPendingMigrations().ToList();
-        var identityAppliedMigrations = identityContext.Database.GetAppliedMigrations().ToList();
-        Console.WriteLine($"ApplicationDbContext - Applied: {identityAppliedMigrations.Count}, Pending: {identityPendingMigrations.Count}");
-        
-        if (identityPendingMigrations.Any())
-        {
-            Console.WriteLine($"Applying {identityPendingMigrations.Count} identity migrations: {string.Join(", ", identityPendingMigrations)}");
-            identityContext.Database.Migrate();
-        }
-        else
-        {
-            Console.WriteLine("No pending identity migrations found. Checking if tables exist...");
-            var tablesExist = identityContext.Database.CanConnect() && 
-                             identityContext.Database.SqlQueryRaw<int>("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'AspNetRoles'").FirstOrDefault() > 0;
-            Console.WriteLine($"AspNetRoles table exists: {tablesExist}");
-            
-            if (!tablesExist)
-            {
-                Console.WriteLine("Identity tables don't exist. Creating database...");
-                identityContext.Database.EnsureCreated();
-            }
-        }
-        
-        Console.WriteLine("Migrations applied successfully");
+        Console.WriteLine("Databases created successfully");
         
         // Seed roles
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -137,10 +93,6 @@ using (var scope = app.Services.CreateScope())
                 await roleManager.CreateAsync(new IdentityRole(role));
                 Console.WriteLine($"Created role: {role}");
             }
-            else
-            {
-                Console.WriteLine($"Role already exists: {role}");
-            }
         }
         
         Console.WriteLine("Database initialization completed successfully");
@@ -148,8 +100,7 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         Console.WriteLine($"Database initialization error: {ex.Message}");
-        Console.WriteLine($"Stack trace: {ex.StackTrace}");
-        // Continue startup even if seeding fails
+        // Continue startup
     }
 }
 
