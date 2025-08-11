@@ -2,34 +2,42 @@ version: '3.8'
 
 services:
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        - BUILD_COMMAND=npm run build:prod
     ports:
       - "80:80"
     depends_on:
       - backend
+    command: nginx -g 'daemon off;'
     restart: unless-stopped
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      args:
+        - BUILD_COMMAND=dotnet publish -c Release -o out
     ports:
       - "3000:3000"
     depends_on:
       - database
       - minio
     environment:
-      - ConnectionStrings__DefaultConnection=Host=database;Database=appdb;Username=${DB_USER:-user};Password=${DB_PASSWORD:-password}
+      - ConnectionStrings__DefaultConnection=Host=database;Database=appdb;Username=user;Password=password
       - MinIO__Endpoint=minio:9000
-      - MinIO__AccessKey=${MINIO_ACCESS_KEY:-minioadmin}
-      - MinIO__SecretKey=${MINIO_SECRET_KEY:-minioadmin}
+      - MinIO__AccessKey=minioadmin
+      - MinIO__SecretKey=minioadmin
       - MinIO__BucketName=uploads
       - ASPNETCORE_ENVIRONMENT=Production
+    command: dotnet out/YourApp.dll
     restart: unless-stopped
 
   database:
     image: postgres:15
     environment:
-      - POSTGRES_USER=${DB_USER:-user}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-password}
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
       - POSTGRES_DB=appdb
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -38,8 +46,8 @@ services:
   minio:
     image: minio/minio:latest
     environment:
-      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin}
-      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-minioadmin}
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"

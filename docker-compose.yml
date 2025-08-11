@@ -2,14 +2,21 @@ version: '3.8'
 
 services:
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        - BUILD_COMMAND=npm run build:prod
     ports:
       - "4200:80"
     depends_on:
       - backend
+    command: nginx -g 'daemon off;'
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      args:
+        - BUILD_COMMAND=dotnet publish -c Release -o out
     ports:
       - "3000:3000"
     depends_on:
@@ -21,6 +28,7 @@ services:
       - MinIO__AccessKey=minioadmin
       - MinIO__SecretKey=minioadmin
       - MinIO__BucketName=uploads
+    command: dotnet out/YourApp.dll
 
   database:
     image: postgres:15
