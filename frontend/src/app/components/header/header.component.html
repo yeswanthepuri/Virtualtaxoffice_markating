@@ -1,0 +1,61 @@
+<header class="header-main fixed top-0 w-full bg-white shadow-sm z-50 border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center py-3">
+      <!-- Logo Section -->
+      <div class="logo-container flex items-center cursor-pointer">
+        <div class="logo-text">
+          <h1 class="text-3xl font-bold font-sans tracking-tight">
+            Virtual<span class="text-blue-500">Tax</span>Office
+          </h1>
+          <p class="text-xs text-gray-500 font-sans -mt-1 tracking-wide">The Future of Tax Management is Here</p>
+        </div>
+      </div>
+      
+      <!-- Desktop Navigation -->
+      <nav class="nav-menu hidden lg:flex items-center space-x-8">
+        <a routerLink="/" class="nav-link text-blue-500 font-semibold font-sans hover:text-blue-600 transition-colors border-b-2 border-blue-500 pb-1" routerLinkActive="text-blue-500 border-b-2 border-blue-500" [routerLinkActiveOptions]="{exact: true}">HOME</a>
+        <a routerLink="/about" class="nav-link text-gray-700 font-semibold font-sans hover:text-blue-500 transition-colors pb-1 hover:border-b-2 hover:border-blue-500" routerLinkActive="text-blue-500 border-b-2 border-blue-500">ABOUT VTO</a>
+        <a routerLink="/partners" class="nav-link text-gray-700 font-semibold font-sans hover:text-blue-500 transition-colors pb-1 hover:border-b-2 hover:border-blue-500" routerLinkActive="text-blue-500 border-b-2 border-blue-500">PARTNERS</a>
+        <a routerLink="/pricing" class="nav-link text-gray-700 font-semibold font-sans hover:text-blue-500 transition-colors pb-1 hover:border-b-2 hover:border-blue-500" routerLinkActive="text-blue-500 border-b-2 border-blue-500">PLANS & PRICING</a>
+      </nav>
+      
+      <!-- Auth Buttons -->
+      <div class="auth-buttons hidden lg:flex items-center space-x-3">
+        <button class="signup-btn px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded font-semibold font-sans transition-all duration-300">
+          SIGN UP
+        </button>
+        <button class="login-btn px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded font-semibold font-sans transition-all duration-300">
+          LOG IN
+        </button>
+      </div>
+      
+      <!-- Mobile Menu Button -->
+      <button class="mobile-menu-btn lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors" (click)="toggleMobileMenu()">
+        <svg class="hamburger-icon w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+        <svg class="close-icon w-6 h-6 text-gray-700 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Mobile Menu -->
+    <div class="mobile-menu lg:hidden hidden bg-white border-t border-gray-200 py-4">
+      <div class="flex flex-col space-y-4">
+        <a routerLink="/" class="mobile-nav-link text-blue-500 font-semibold font-sans px-4 py-2 hover:bg-gray-50 transition-colors" routerLinkActive="text-blue-500" [routerLinkActiveOptions]="{exact: true}">HOME</a>
+        <a routerLink="/about" class="mobile-nav-link text-gray-700 font-semibold font-sans px-4 py-2 hover:bg-gray-50 hover:text-blue-500 transition-colors" routerLinkActive="text-blue-500">ABOUT VTO</a>
+        <a routerLink="/partners" class="mobile-nav-link text-gray-700 font-semibold font-sans px-4 py-2 hover:bg-gray-50 hover:text-blue-500 transition-colors" routerLinkActive="text-blue-500">PARTNERS</a>
+        <a routerLink="/pricing" class="mobile-nav-link text-gray-700 font-semibold font-sans px-4 py-2 hover:bg-gray-50 hover:text-blue-500 transition-colors" routerLinkActive="text-blue-500">PLANS & PRICING</a>
+        <div class="flex flex-col space-y-2 px-4 pt-4 border-t border-gray-200">
+          <button class="mobile-signup-btn py-2 bg-gray-500 hover:bg-gray-600 text-white rounded font-semibold font-sans transition-all duration-300">
+            SIGN UP
+          </button>
+          <button class="mobile-login-btn py-2 bg-blue-500 hover:bg-blue-600 text-white rounded font-semibold font-sans transition-all duration-300">
+            LOG IN
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
