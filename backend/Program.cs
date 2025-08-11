@@ -73,24 +73,62 @@ using (var scope = app.Services.CreateScope())
         var appContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var identityContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         
-        // Apply migrations
-        appContext.Database.Migrate();
-        identityContext.Database.Migrate();
+        Console.WriteLine("Testing database connection...");
         
+        // Test connection
+        if (appContext.Database.CanConnect())
+        {
+            Console.WriteLine("Database connection successful");
+        }
+        else
+        {
+            Console.WriteLine("Database connection failed");
+            return;
+        }
+        
+        Console.WriteLine("Applying migrations...");
+        
+        // Apply migrations
+        var appPendingMigrations = appContext.Database.GetPendingMigrations();
+        if (appPendingMigrations.Any())
+        {
+            Console.WriteLine($"Applying {appPendingMigrations.Count()} app migrations");
+            appContext.Database.Migrate();
+        }
+        
+        var identityPendingMigrations = identityContext.Database.GetPendingMigrations();
+        if (identityPendingMigrations.Any())
+        {
+            Console.WriteLine($"Applying {identityPendingMigrations.Count()} identity migrations");
+            identityContext.Database.Migrate();
+        }
+        
+        Console.WriteLine("Migrations applied successfully");
+        
+        // Seed roles
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var roles = new[] { "Admin", "User", "Manager" };
         
+        Console.WriteLine("Seeding roles...");
         foreach (var role in roles)
         {
             if (!await roleManager.RoleExistsAsync(role))
             {
                 await roleManager.CreateAsync(new IdentityRole(role));
+                Console.WriteLine($"Created role: {role}");
+            }
+            else
+            {
+                Console.WriteLine($"Role already exists: {role}");
             }
         }
+        
+        Console.WriteLine("Database initialization completed successfully");
     }
     catch (Exception ex)
     {
         Console.WriteLine($"Database initialization error: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
         // Continue startup even if seeding fails
     }
 }
@@ -100,7 +138,31 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // Add a simple health check endpoint
-app.MapGet("/api/health", () => "Backend is running!");
+app.MapGet("/api/health", async (AppDbContext appContext, ApplicationDbContext identityContext) => 
+{
+    try
+    {
+        var canConnectApp = await appContext.Database.CanConnectAsync();
+        var canConnectIdentity = await identityContext.Database.CanConnectAsync();
+        
+        return new { 
+            status = "healthy", 
+            database = new {
+                appContext = canConnectApp ? "connected" : "disconnected",
+                identityContext = canConnectIdentity ? "connected" : "disconnected"
+            },
+            timestamp = DateTime.UtcNow
+        };
+    }
+    catch (Exception ex)
+    {
+        return new { 
+            status = "unhealthy", 
+            error = ex.Message,
+            timestamp = DateTime.UtcNow
+        };
+    }
+});
 
 app.MapControllers();
 
