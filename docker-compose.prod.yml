@@ -7,7 +7,7 @@ services:
       args:
         - BUILD_COMMAND=npm run build:prod
     ports:
-      - "8080:80"
+      - "8081:80"
     depends_on:
       - backend
     command: nginx -g 'daemon off;'
