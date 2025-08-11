@@ -65,21 +65,33 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Seed roles
+// Initialize database and seed roles
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    context.Database.EnsureCreated();
-    
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var roles = new[] { "Admin", "User", "Manager" };
-    
-    foreach (var role in roles)
+    try
     {
-        if (!await roleManager.RoleExistsAsync(role))
+        var appContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var identityContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        
+        // Apply migrations
+        appContext.Database.Migrate();
+        identityContext.Database.Migrate();
+        
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var roles = new[] { "Admin", "User", "Manager" };
+        
+        foreach (var role in roles)
         {
-            await roleManager.CreateAsync(new IdentityRole(role));
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole(role));
+            }
         }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database initialization error: {ex.Message}");
+        // Continue startup even if seeding fails
     }
 }
 
