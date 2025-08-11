@@ -83,7 +83,7 @@ using (var scope = app.Services.CreateScope())
         else
         {
             Console.WriteLine("Database connection failed");
-            return;
+            throw new Exception("Cannot connect to database");
         }
         
         Console.WriteLine("Applying migrations...");
