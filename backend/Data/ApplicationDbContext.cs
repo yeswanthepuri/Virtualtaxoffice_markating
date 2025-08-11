@@ -11,7 +11,7 @@ namespace MarketingSite.Data
         }
         
         public DbSet<Partner> Partners { get; set; }
-        public DbSet<User> Users { get; set; }
+        public DbSet<User> SimpleUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
