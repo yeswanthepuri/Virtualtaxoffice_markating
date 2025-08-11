@@ -8,9 +8,6 @@ using MarketingSite.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -70,16 +67,14 @@ using (var scope = app.Services.CreateScope())
 {
     try
     {
-        var appContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var identityContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         
-        Console.WriteLine("Creating databases...");
+        Console.WriteLine("Creating database with all tables...");
         
-        // Create databases
-        appContext.Database.EnsureCreated();
+        // Create database with all tables (Identity + custom)
         identityContext.Database.EnsureCreated();
         
-        Console.WriteLine("Databases created successfully");
+        Console.WriteLine("Database created successfully");
         
         // Seed roles
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -113,18 +108,12 @@ app.MapGet("/api/health", async (HttpContext context) =>
 {
     try
     {
-        var appContext = context.RequestServices.GetRequiredService<AppDbContext>();
-        var identityContext = context.RequestServices.GetRequiredService<ApplicationDbContext>();
-        
-        var canConnectApp = await appContext.Database.CanConnectAsync();
-        var canConnectIdentity = await identityContext.Database.CanConnectAsync();
+        var dbContext = context.RequestServices.GetRequiredService<ApplicationDbContext>();
+        var canConnect = await dbContext.Database.CanConnectAsync();
         
         var result = new { 
             status = "healthy", 
-            database = new {
-                appContext = canConnectApp ? "connected" : "disconnected",
-                identityContext = canConnectIdentity ? "connected" : "disconnected"
-            },
+            database = canConnect ? "connected" : "disconnected",
             timestamp = DateTime.UtcNow
         };
         
@@ -145,12 +134,6 @@ app.MapGet("/api/health", async (HttpContext context) =>
 app.MapControllers();
 
 app.Run();
-
-public class AppDbContext : DbContext
-{
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-    public DbSet<User> Users { get; set; }
-}
 
 public class User
 {
