@@ -4,6 +4,8 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        - CONFIGURATION=production
     ports:
       - "8081:80"
     depends_on:
@@ -14,7 +16,7 @@ services:
     build:
       context: ./backend
     ports:
-      - "3000:3000"
+      - "3000:80"
     depends_on:
       - database
       - minio
@@ -25,13 +27,13 @@ services:
       - MinIO__SecretKey=minioadmin
       - MinIO__BucketName=uploads
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:3000
+      - ASPNETCORE_URLS=http://+:80
       - Jwt__Key=your-super-secret-jwt-key-here
       - Jwt__Issuer=https://vtobackend.marthand.org
       - Jwt__Audience=https://vtobackend.marthand.org
       - API_BASE_URL=https://vtobackend.marthand.org
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
