@@ -30,7 +30,7 @@ namespace MarketingSite.Services
                 {
                     // Apply migrations
                     await _context.Database.MigrateAsync();
-                    await _context.Database.EnsureCreatedAsync();
+                    //await _context.Database.EnsureCreatedAsync();
                 }
                 catch (Exception migrationEx)
                 {
@@ -42,7 +42,7 @@ namespace MarketingSite.Services
                 _logger.LogInformation("Database created successfully");
                 
                 // Seed roles
-                await SeedRolesAsync();
+                //await SeedRolesAsync();
                 
                 _logger.LogInformation("Database initialization completed successfully");
             }
