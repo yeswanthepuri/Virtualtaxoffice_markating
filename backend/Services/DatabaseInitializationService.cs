@@ -43,20 +43,20 @@ namespace MarketingSite.Services
             }
         }
 
-        // private async Task SeedRolesAsync()
-        // {
-        //     var roles = new[] { "Admin", "User", "Manager" };
+        private async Task SeedRolesAsync()
+        {
+            var roles = new[] { "Admin", "User", "Manager" };
             
-        //     _logger.LogInformation("Seeding roles...");
+            _logger.LogInformation("Seeding roles...");
             
-        //     foreach (var role in roles)
-        //     {
-        //         if (!await _roleManager.RoleExistsAsync(role))
-        //         {
-        //             await _roleManager.CreateAsync(new IdentityRole(role));
-        //             _logger.LogInformation("Created role: {Role}", role);
-        //         }
-        //     }
-        // }
+            foreach (var role in roles)
+            {
+                if (!await _roleManager.RoleExistsAsync(role))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(role));
+                    _logger.LogInformation("Created role: {Role}", role);
+                }
+            }
+        }
     }
 }
