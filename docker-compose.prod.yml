@@ -23,16 +23,16 @@ services:
       - MinIO__SecretKey=minioadmin
       - MinIO__BucketName=uploads
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:5000
       - Jwt__Key=your-super-secret-jwt-key-here
       - Jwt__Issuer=https://vtobackend.marthand.org
       - Jwt__Audience=https://vtobackend.marthand.org
       - API_BASE_URL=https://vtobackend.marthand.org
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`vtobackend.marthand.org`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.backend.loadbalancer.server.port=8080"
     restart: unless-stopped
 
   database:
