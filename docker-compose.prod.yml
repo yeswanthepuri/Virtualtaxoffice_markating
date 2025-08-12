@@ -34,9 +34,7 @@ services:
       - traefik.http.routers.vtobackend.entrypoints=websecure
       - traefik.http.routers.vtobackend.tls.certresolver=letsencrypt
       - traefik.http.services.vtobackend.loadbalancer.server.port=8080
-      - traefik.docker.network=coolify-overlay
-    networks:
-      - coolify-overlay
+
     restart: unless-stopped
 
   database:
