@@ -98,7 +98,6 @@ using (var scope = app.Services.CreateScope())
         // Continue startup
     }
 }
-app.UseHttpsRedirection();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
