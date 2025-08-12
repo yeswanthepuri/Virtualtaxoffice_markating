@@ -30,12 +30,13 @@ namespace MarketingSite.Services
                 {
                     // Apply migrations
                     await _context.Database.MigrateAsync();
+                    await _context.Database.EnsureCreatedAsync();
                 }
                 catch (Exception migrationEx)
                 {
                     _logger.LogWarning(migrationEx, "Migration failed, falling back to EnsureCreated");
                     // Fallback to EnsureCreated if migrations fail
-                    await _context.Database.EnsureCreatedAsync();
+                    
                 }
                 
                 _logger.LogInformation("Database created successfully");
