@@ -3,10 +3,11 @@ FROM node:18-alpine AS build
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm install --include=dev
 
 COPY . .
-RUN npm run build
+ARG CONFIGURATION=production
+RUN npm run build -- --configuration=${CONFIGURATION}
 
 FROM nginx:alpine
 COPY nginx.conf /etc/nginx/nginx.conf
