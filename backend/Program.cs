@@ -5,6 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using MarketingSite.Data;
 using MarketingSite.Models;
+using MarketingSite.Middleware;
+using MarketingSite.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +52,9 @@ builder.Services.AddAuthorization();
 // Add MinIO Service
 builder.Services.AddSingleton<MarketingSite.Services.MinIOService>();
 
+// Add Database Initialization Service
+builder.Services.AddScoped<DatabaseInitializationService>();
+
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
@@ -62,42 +67,13 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Initialize database and seed roles
+// // Initialize database and seed roles
 using (var scope = app.Services.CreateScope())
 {
-    try
-    {
-        var identityContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        
-        Console.WriteLine("Creating database with all tables...");
-        
-        // Create database with all tables (Identity + custom)
-        identityContext.Database.EnsureCreated();
-        
-        Console.WriteLine("Database created successfully");
-        
-        // Seed roles
-        // var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        // var roles = new[] { "Admin", "User", "Manager" };
-        
-        // Console.WriteLine("Seeding roles...");
-        // // foreach (var role in roles)
-        // // {
-        // //     if (!await roleManager.RoleExistsAsync(role))
-        // //     {
-        // //         await roleManager.CreateAsync(new IdentityRole(role));
-        // //         Console.WriteLine($"Created role: {role}");
-        // //     }
-        // // }
-        
-        // Console.WriteLine("Database initialization completed successfully");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Database initialization error: {ex.Message}");
-        // Continue startup
-    }
+    var dbInitService = scope.ServiceProvider.GetRequiredService<DatabaseInitializationService>();
+    await dbInitService.InitializeAsync();
 }
+app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
