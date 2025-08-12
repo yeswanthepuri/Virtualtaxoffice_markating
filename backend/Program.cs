@@ -54,7 +54,7 @@ builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
-        policy.WithOrigins("http://localhost:4200", "https://vto.marthand.org", "https://vtobackend.coolify.marthand.org")
+        policy.WithOrigins("http://localhost:4200", "https://vtobackend.coolify.marthand.org", "https://vto.coolify.marthand.org")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials());
