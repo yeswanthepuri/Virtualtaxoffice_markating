@@ -13,6 +13,9 @@ services:
   backend:
     build:
       context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5010:5010"
     depends_on:
       - database
       - minio
@@ -23,18 +26,10 @@ services:
       - MinIO__SecretKey=minioadmin
       - MinIO__BucketName=uploads
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8080
       - Jwt__Key=your-super-secret-jwt-key-here
       - Jwt__Issuer=https://vtobackend.marthand.org
       - Jwt__Audience=https://vtobackend.marthand.org
       - API_BASE_URL=https://vtobackend.marthand.org
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.vtobackend.rule=Host(`vtobackend.marthand.org`)
-      - traefik.http.routers.vtobackend.entrypoints=websecure
-      - traefik.http.routers.vtobackend.tls.certresolver=letsencrypt
-      - traefik.http.services.vtobackend.loadbalancer.server.port=8080
-
     restart: unless-stopped
 
   database:
@@ -60,7 +55,3 @@ services:
 volumes:
   postgres_data:
   minio_data:
-
-networks:
-  coolify-overlay:
-    external: true

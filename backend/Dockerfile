@@ -1,15 +1,19 @@
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 5010
+
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["Backend.csproj", "."]
-RUN dotnet restore "Backend.csproj"
+COPY ["Backend.csproj", "./"]
+RUN dotnet restore "./Backend.csproj"
 COPY . .
-RUN dotnet publish "Backend.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet build "./Backend.csproj" -c Release -o /app/build
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+FROM build AS publish
+RUN dotnet publish "./Backend.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
 WORKDIR /app
-# Run Kestrel on 8080 so Traefik can target it
-ENV ASPNETCORE_URLS=http://+:8080
-COPY --from=build /app/publish .
-# Health endpoint
-HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://127.0.0.1:8080/api/health || exit 1
+COPY --from=publish /app/publish .
+ENV ASPNETCORE_URLS=http://+:5010
 ENTRYPOINT ["dotnet", "Backend.dll"]
