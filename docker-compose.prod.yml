@@ -27,9 +27,9 @@ services:
       - MinIO__BucketName=uploads
       - ASPNETCORE_ENVIRONMENT=Production
       - Jwt__Key=your-super-secret-jwt-key-here-with-256-bits-minimum-length
-      - Jwt__Issuer=https://vtobackend.marthand.org
-      - Jwt__Audience=https://vtobackend.marthand.org
-      - API_BASE_URL=https://vtobackend.marthand.org
+      - Jwt__Issuer=https://vtobackend.coolify.marthand.org
+      - Jwt__Audience=https://vtobackend.coolify.marthand.org
+      - API_BASE_URL=https://vtobackend.coolify.marthand.org
     restart: unless-stopped
 
   database:
