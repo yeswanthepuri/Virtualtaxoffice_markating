@@ -28,11 +28,11 @@ services:
       - Jwt__Audience=https://vtobackend.marthand.org
       - API_BASE_URL=https://vtobackend.marthand.org
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`vtobackend.marthand.org`)"
-      - "traefik.http.routers.backend.entrypoints=websecure"
-      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.backend.loadbalancer.server.port=8080"
+      - traefik.enable=true
+      - traefik.http.routers.vtobackend.rule=Host(`vtobackend.marthand.org`)
+      - traefik.http.routers.vtobackend.entrypoints=websecure
+      - traefik.http.routers.vtobackend.tls.certresolver=letsencrypt
+      - traefik.http.services.vtobackend.loadbalancer.server.port=8080
     restart: unless-stopped
 
   database:
