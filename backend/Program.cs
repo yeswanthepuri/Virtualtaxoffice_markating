@@ -77,20 +77,20 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine("Database created successfully");
         
         // Seed roles
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        var roles = new[] { "Admin", "User", "Manager" };
+        // var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        // var roles = new[] { "Admin", "User", "Manager" };
         
-        Console.WriteLine("Seeding roles...");
-        foreach (var role in roles)
-        {
-            if (!await roleManager.RoleExistsAsync(role))
-            {
-                await roleManager.CreateAsync(new IdentityRole(role));
-                Console.WriteLine($"Created role: {role}");
-            }
-        }
+        // Console.WriteLine("Seeding roles...");
+        // // foreach (var role in roles)
+        // // {
+        // //     if (!await roleManager.RoleExistsAsync(role))
+        // //     {
+        // //         await roleManager.CreateAsync(new IdentityRole(role));
+        // //         Console.WriteLine($"Created role: {role}");
+        // //     }
+        // // }
         
-        Console.WriteLine("Database initialization completed successfully");
+        // Console.WriteLine("Database initialization completed successfully");
     }
     catch (Exception ex)
     {
