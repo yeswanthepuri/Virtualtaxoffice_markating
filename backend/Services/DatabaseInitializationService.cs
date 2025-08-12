@@ -32,7 +32,7 @@ namespace MarketingSite.Services
                 _logger.LogInformation("Database created successfully");
                 
                 // Seed roles
-               // await SeedRolesAsync();
+                await SeedRolesAsync();
                 
                 _logger.LogInformation("Database initialization completed successfully");
             }
