@@ -26,8 +26,17 @@ namespace MarketingSite.Services
             {
                 _logger.LogInformation("Creating database with all tables...");
                 
-                // Apply migrations
-                await _context.Database.MigrateAsync();
+                try
+                {
+                    // Apply migrations
+                    await _context.Database.MigrateAsync();
+                }
+                catch (Exception migrationEx)
+                {
+                    _logger.LogWarning(migrationEx, "Migration failed, falling back to EnsureCreated");
+                    // Fallback to EnsureCreated if migrations fail
+                    await _context.Database.EnsureCreatedAsync();
+                }
                 
                 _logger.LogInformation("Database created successfully");
                 
