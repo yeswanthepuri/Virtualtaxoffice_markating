@@ -21,14 +21,14 @@ namespace Backend.Controllers
         [HttpGet("countries")]
         public async Task<ActionResult<IEnumerable<Country>>> GetCountries()
         {
-            return await _context.Countries.Include(c => c.States).ToListAsync();
+            return await _context.Countries.ToListAsync();
         }
 
         [HttpGet("states/{countryId}")]
         public async Task<ActionResult<IEnumerable<State>>> GetStatesByCountry(int countryId)
         {
             if (countryId == 0)
-                return await _context.States.Include(s => s.Country).ToListAsync();
+                return await _context.States.ToListAsync();
             return await _context.States.Where(s => s.CountryId == countryId).ToListAsync();
         }
 
