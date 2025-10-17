@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-article-management',
@@ -95,10 +97,25 @@ import { Component } from '@angular/core';
             <label class="block text-sm font-medium text-gray-700 mb-1">Excel File (Optional)</label>
             <input type="file" (change)="onFileSelect($event)" accept=".xlsx,.xls" 
                    class="w-full border rounded px-3 py-2">
-            <div *ngIf="selectedFile" class="mt-2 p-2 bg-blue-50 rounded text-sm">
+            <div *ngIf="selectedFile" class="mt-2 p-2 rounded text-sm" [ngClass]="{
+              'bg-blue-50': validationStatus === 'validating',
+              'bg-green-50': validationStatus === 'valid',
+              'bg-red-50': validationStatus === 'invalid'
+            }">
               <strong>Selected:</strong> {{selectedFile.name}} ({{(selectedFile.size / 1024).toFixed(2)}} KB)
-              <div class="mt-1 text-xs text-gray-600">
-                Will validate: State column, header length ≤60 chars, data ≤600 chars
+              <div class="mt-1 text-xs" [ngClass]="{
+                'text-blue-600': validationStatus === 'validating',
+                'text-green-600': validationStatus === 'valid',
+                'text-red-600': validationStatus === 'invalid'
+              }">
+                <span *ngIf="validationStatus === 'validating'">Validating...</span>
+                <span *ngIf="validationStatus === 'valid'">✓ File validated successfully</span>
+                <div *ngIf="validationStatus === 'invalid'">
+                  <div>✗ Validation failed:</div>
+                  <ul class="list-disc list-inside mt-1">
+                    <li *ngFor="let error of validationErrors">{{error}}</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -119,9 +136,14 @@ import { Component } from '@angular/core';
   `
 })
 export class ArticleManagementComponent {
+  constructor(private http: HttpClient) {}
+  
   showForm = false;
   isEditing = false;
   selectedFile: File | null = null;
+  validatedJsonData: string | null = null;
+  validationStatus: 'none' | 'validating' | 'valid' | 'invalid' = 'none';
+  validationErrors: string[] = [];
   
   currentArticle = {
     id: 0,
@@ -134,28 +156,19 @@ export class ArticleManagementComponent {
     createdAt: new Date()
   };
 
-  articles = [
-    {
-      id: 1,
-      linkDescription: 'Tax Tips',
-      linkShortDescription: 'Essential tax planning strategies',
-      articleTitle: 'Tax Planning Tips for 2024',
-      articleShortDescription: 'Learn the best strategies for tax planning...',
-      articleDetails: 'Detailed tax planning information...',
-      status: 'Published',
-      createdAt: new Date('2024-01-15')
-    },
-    {
-      id: 2,
-      linkDescription: 'New Laws',
-      linkShortDescription: 'Latest tax law changes',
-      articleTitle: 'New Tax Laws 2024',
-      articleShortDescription: 'Overview of recent tax law changes...',
-      articleDetails: 'Comprehensive guide to new tax laws...',
-      status: 'Draft',
-      createdAt: new Date('2024-01-10')
-    }
-  ];
+  articles: any[] = [];
+
+  ngOnInit() {
+    this.loadArticles();
+  }
+
+  loadArticles() {
+    this.http.get<any[]>(`${environment.apiUrl}/article`)
+      .subscribe({
+        next: data => this.articles = data,
+        error: error => console.error('Error loading articles:', error)
+      });
+  }
 
   addArticle() {
     this.showForm = true;
@@ -170,32 +183,14 @@ export class ArticleManagementComponent {
   }
 
   saveArticle() {
-    if (this.selectedFile) {
-      // First validate the Excel file
-      this.validateExcelFile().then(validationResult => {
-        if (validationResult.isValid) {
-          // Save article with validated JSON data
-          this.saveArticleWithData(validationResult.jsonData);
-        } else {
-          // Show validation errors
-          alert('Excel validation failed:\n' + validationResult.errors.join('\n'));
-        }
-      });
-    } else {
-      // Save article without file
-      this.saveArticleWithData(null);
-    }
+    this.saveArticleWithData(this.validatedJsonData);
   }
 
   validateExcelFile(): Promise<any> {
     const formData = new FormData();
     formData.append('file', this.selectedFile!);
 
-    return fetch('/api/filevalidation/validate', {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => response.json());
+    return this.http.post<any>(`${environment.apiUrl}/filevalidation/validate`, formData).toPromise();
   }
 
   saveArticleWithData(jsonData: string | null) {
@@ -211,29 +206,27 @@ export class ArticleManagementComponent {
       formData.append('JsonData', jsonData);
     }
 
-    const url = this.isEditing ? `/api/article/${this.currentArticle.id}` : '/api/article';
-    const method = this.isEditing ? 'PUT' : 'POST';
+    const request = this.isEditing 
+      ? this.http.put<any>(`${environment.apiUrl}/article/${this.currentArticle.id}`, formData)
+      : this.http.post<any>(`${environment.apiUrl}/article`, formData);
 
-    fetch(url, {
-      method: method,
-      body: formData
-    })
-    .then(response => {
-      if (response.ok) {
+    request.subscribe({
+      next: () => {
         alert('Article saved successfully!');
+        this.loadArticles();
         this.cancelForm();
-      } else {
-        alert('Error saving article');
-      }
-    })
-    .catch(error => {
-      alert('Error saving article: ' + error.message);
+      },
+      error: error => alert('Error saving article: ' + error.message)
     });
   }
 
   deleteArticle(id: number) {
     if (confirm('Are you sure you want to delete this article?')) {
-      this.articles = this.articles.filter(a => a.id !== id);
+      this.http.delete<any>(`${environment.apiUrl}/article/${id}`)
+        .subscribe({
+          next: () => this.loadArticles(),
+          error: error => alert('Error deleting article: ' + error.message)
+        });
     }
   }
 
@@ -254,18 +247,48 @@ export class ArticleManagementComponent {
       createdAt: new Date()
     };
     this.selectedFile = null;
+    this.resetValidation();
   }
 
   onFileSelect(event: any) {
     const file = event.target.files[0];
     if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
       this.selectedFile = file;
+      this.validateFileOnSelection();
     } else {
       this.selectedFile = null;
+      this.resetValidation();
       if (file) {
         alert('Please select only Excel files (.xlsx or .xls)');
       }
     }
+  }
+
+  validateFileOnSelection() {
+    if (!this.selectedFile) return;
+    
+    this.validationStatus = 'validating';
+    this.validationErrors = [];
+    this.validatedJsonData = null;
+
+    this.validateExcelFile().then(validationResult => {
+      if (validationResult.isValid) {
+        this.validationStatus = 'valid';
+        this.validatedJsonData = validationResult.jsonData;
+      } else {
+        this.validationStatus = 'invalid';
+        this.validationErrors = validationResult.errors || [];
+      }
+    }).catch(error => {
+      this.validationStatus = 'invalid';
+      this.validationErrors = ['Validation failed: ' + error.message];
+    });
+  }
+
+  resetValidation() {
+    this.validationStatus = 'none';
+    this.validationErrors = [];
+    this.validatedJsonData = null;
   }
 
   getStatusClass(status: string): string {
