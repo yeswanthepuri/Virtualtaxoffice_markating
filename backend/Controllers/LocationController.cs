@@ -27,6 +27,8 @@ namespace Backend.Controllers
         [HttpGet("states/{countryId}")]
         public async Task<ActionResult<IEnumerable<State>>> GetStatesByCountry(int countryId)
         {
+            if (countryId == 0)
+                return await _context.States.Include(s => s.Country).ToListAsync();
             return await _context.States.Where(s => s.CountryId == countryId).ToListAsync();
         }
 

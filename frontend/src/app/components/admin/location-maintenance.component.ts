@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-location-maintenance',
@@ -164,6 +166,8 @@ import { Component, OnInit } from '@angular/core';
   `
 })
 export class LocationMaintenanceComponent implements OnInit {
+  constructor(private http: HttpClient) {}
+
   activeTab = 'countries';
   showCountryForm = false;
   showStateForm = false;
@@ -174,18 +178,29 @@ export class LocationMaintenanceComponent implements OnInit {
   currentCountry = { id: 0, name: '', code: '', isActive: true };
   currentState = { id: 0, name: '', code: '', countryId: 0, isActive: true };
 
-  countries = [
-    { id: 1, name: 'United States', code: 'USA', isActive: true, states: [] },
-    { id: 2, name: 'Canada', code: 'CAN', isActive: true, states: [] }
-  ];
+  countries: any[] = [];
+  states: any[] = [];
 
-  states = [
-    { id: 1, name: 'California', code: 'CA', countryId: 1, isActive: true },
-    { id: 2, name: 'Texas', code: 'TX', countryId: 1, isActive: true },
-    { id: 3, name: 'Ontario', code: 'ON', countryId: 2, isActive: true }
-  ];
+  ngOnInit() {
+    this.loadCountries();
+    this.loadStates();
+  }
 
-  ngOnInit() {}
+  loadCountries() {
+    this.http.get<any[]>(`${environment.apiUrl}/location/countries`)
+      .subscribe({
+        next: data => this.countries = data,
+        error: error => console.error('Error loading countries:', error)
+      });
+  }
+
+  loadStates() {
+    this.http.get<any[]>(`${environment.apiUrl}/location/states/0`)
+      .subscribe({
+        next: data => this.states = data,
+        error: error => console.error('Error loading states:', error)
+      });
+  }
 
   get filteredStates() {
     return this.selectedCountryId 
@@ -206,19 +221,29 @@ export class LocationMaintenanceComponent implements OnInit {
   }
 
   saveCountry() {
-    if (this.isEditingCountry) {
-      const index = this.countries.findIndex(c => c.id === this.currentCountry.id);
-      if (index !== -1) this.countries[index] = { ...this.currentCountry, states: [] };
-    } else {
-      this.countries.push({ ...this.currentCountry, id: Date.now(), states: [] });
-    }
-    this.cancelCountryForm();
+    const request = this.isEditingCountry 
+      ? this.http.put<any>(`${environment.apiUrl}/location/countries/${this.currentCountry.id}`, this.currentCountry)
+      : this.http.post<any>(`${environment.apiUrl}/location/countries`, this.currentCountry);
+
+    request.subscribe({
+      next: () => {
+        this.loadCountries();
+        this.cancelCountryForm();
+      },
+      error: error => alert('Error saving country: ' + error.message)
+    });
   }
 
   deleteCountry(id: number) {
     if (confirm('Delete this country and all its states?')) {
-      this.countries = this.countries.filter(c => c.id !== id);
-      this.states = this.states.filter(s => s.countryId !== id);
+      this.http.delete<any>(`${environment.apiUrl}/location/countries/${id}`)
+        .subscribe({
+          next: () => {
+            this.loadCountries();
+            this.loadStates();
+          },
+          error: error => alert('Error deleting country: ' + error.message)
+        });
     }
   }
 
@@ -239,18 +264,26 @@ export class LocationMaintenanceComponent implements OnInit {
   }
 
   saveState() {
-    if (this.isEditingState) {
-      const index = this.states.findIndex(s => s.id === this.currentState.id);
-      if (index !== -1) this.states[index] = { ...this.currentState };
-    } else {
-      this.states.push({ ...this.currentState, id: Date.now() });
-    }
-    this.cancelStateForm();
+    const request = this.isEditingState 
+      ? this.http.put<any>(`${environment.apiUrl}/location/states/${this.currentState.id}`, this.currentState)
+      : this.http.post<any>(`${environment.apiUrl}/location/states`, this.currentState);
+
+    request.subscribe({
+      next: () => {
+        this.loadStates();
+        this.cancelStateForm();
+      },
+      error: error => alert('Error saving state: ' + error.message)
+    });
   }
 
   deleteState(id: number) {
     if (confirm('Delete this state?')) {
-      this.states = this.states.filter(s => s.id !== id);
+      this.http.delete<any>(`${environment.apiUrl}/location/states/${id}`)
+        .subscribe({
+          next: () => this.loadStates(),
+          error: error => alert('Error deleting state: ' + error.message)
+        });
     }
   }
 
