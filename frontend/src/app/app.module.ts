@@ -19,6 +19,8 @@ import { UserRegisterComponent } from './components/admin/user-register.componen
 import { RoleMaintenanceComponent } from './components/admin/role-maintenance.component';
 import { PolicyMaintenanceComponent } from './components/admin/policy-maintenance.component';
 import { PartnerManagementComponent } from './components/admin/partner-management.component';
+import { ArticleManagementComponent } from './components/admin/article-management.component';
+import { LocationMaintenanceComponent } from './components/admin/location-maintenance.component';
 import { PartnersComponent } from './components/partners/partners.component';
 import { PublicRegisterComponent } from './components/public-register/public-register.component';
 
@@ -36,6 +38,8 @@ import { PublicRegisterComponent } from './components/public-register/public-reg
     RoleMaintenanceComponent,
     PolicyMaintenanceComponent,
     PartnerManagementComponent,
+    ArticleManagementComponent,
+    LocationMaintenanceComponent,
     PartnersComponent,
     PublicRegisterComponent
   ],

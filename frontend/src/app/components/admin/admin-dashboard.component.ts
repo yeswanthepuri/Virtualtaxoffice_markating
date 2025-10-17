@@ -12,31 +12,63 @@ import { Component, OnInit } from '@angular/core';
         <h1 class="text-xl font-bold mb-6">Admin</h1>
         
         <nav class="space-y-2">
-          <a (click)="activeTab = 'register'" 
-             [class.text-blue-600]="activeTab === 'register'"
-             [class.font-semibold]="activeTab === 'register'"
-             class="block py-2 px-3 text-gray-700 hover:text-blue-600 cursor-pointer">
-            User Registration
-          </a>
-          <a (click)="activeTab = 'roles'" 
-             [class.text-blue-600]="activeTab === 'roles'"
-             [class.font-semibold]="activeTab === 'roles'"
-             class="block py-2 px-3 text-gray-700 hover:text-blue-600 cursor-pointer">
-            Role Maintenance
-          </a>
-          <a (click)="activeTab = 'policies'" 
-             [class.text-blue-600]="activeTab === 'policies'"
-             [class.font-semibold]="activeTab === 'policies'"
-             class="block py-2 px-3 text-gray-700 hover:text-blue-600 cursor-pointer">
-            Policy Maintenance
-          </a>
-          <a (click)="activeTab = 'partners'" 
-             [class.text-blue-600]="activeTab === 'partners'"
-             [class.font-semibold]="activeTab === 'partners'"
-             class="block py-2 px-3 text-gray-700 hover:text-blue-600 cursor-pointer">
-            Partner Management
-          </a>
-          <a (click)="logout()" class="block py-2 px-3 text-red-600 hover:text-red-800 cursor-pointer">
+          <!-- User Management -->
+          <div class="mb-4">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase mb-2">User Management</h3>
+            <a (click)="activeTab = 'register'" 
+               [class.text-blue-600]="activeTab === 'register'"
+               [class.font-semibold]="activeTab === 'register'"
+               class="block py-2 px-3 text-gray-700 hover:text-blue-600 cursor-pointer ml-2">
+              User Registration
+            </a>
+          </div>
+
+          <!-- Security -->
+          <div class="mb-4">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase mb-2">Security</h3>
+            <a (click)="activeTab = 'roles'" 
+               [class.text-blue-600]="activeTab === 'roles'"
+               [class.font-semibold]="activeTab === 'roles'"
+               class="block py-2 px-3 text-gray-700 hover:text-blue-600 cursor-pointer ml-2">
+              Role Maintenance
+            </a>
+            <a (click)="activeTab = 'policies'" 
+               [class.text-blue-600]="activeTab === 'policies'"
+               [class.font-semibold]="activeTab === 'policies'"
+               class="block py-2 px-3 text-gray-700 hover:text-blue-600 cursor-pointer ml-2">
+              Policy Maintenance
+            </a>
+            <a (click)="activeTab = 'locations'" 
+               [class.text-blue-600]="activeTab === 'locations'"
+               [class.font-semibold]="activeTab === 'locations'"
+               class="block py-2 px-3 text-gray-700 hover:text-blue-600 cursor-pointer ml-2">
+              Location Maintenance
+            </a>
+          </div>
+
+          <!-- Content Management -->
+          <div class="mb-4">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase mb-2">Content</h3>
+            <a (click)="activeTab = 'articles'" 
+               [class.text-blue-600]="activeTab === 'articles'"
+               [class.font-semibold]="activeTab === 'articles'"
+               class="block py-2 px-3 text-gray-700 hover:text-blue-600 cursor-pointer ml-2">
+              Article Management
+            </a>
+          </div>
+
+          <!-- Business -->
+          <div class="mb-4">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase mb-2">Business</h3>
+            <a (click)="activeTab = 'partners'" 
+               [class.text-blue-600]="activeTab === 'partners'"
+               [class.font-semibold]="activeTab === 'partners'"
+               class="block py-2 px-3 text-gray-700 hover:text-blue-600 cursor-pointer ml-2">
+              Partner Management
+            </a>
+          </div>
+
+          <a (click)="logout()" class="block py-2 px-3 text-red-600 hover:text-red-800 cursor-pointer mt-6">
             Logout
           </a>
         </nav>
@@ -47,6 +79,8 @@ import { Component, OnInit } from '@angular/core';
         <app-role-maintenance *ngIf="activeTab === 'roles'"></app-role-maintenance>
         <app-policy-maintenance *ngIf="activeTab === 'policies'"></app-policy-maintenance>
         <app-partner-management *ngIf="activeTab === 'partners'"></app-partner-management>
+        <app-article-management *ngIf="activeTab === 'articles'"></app-article-management>
+        <app-location-maintenance *ngIf="activeTab === 'locations'"></app-location-maintenance>
       </div>
     </div>
   `
