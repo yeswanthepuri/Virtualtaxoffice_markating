@@ -118,6 +118,11 @@ import { environment } from '../../../environments/environment';
                 </div>
               </div>
             </div>
+            
+            <div *ngIf="validatedJsonData" class="mt-2 p-3 bg-gray-50 rounded border">
+              <div class="text-sm font-medium text-gray-700 mb-2">JSON Response:</div>
+              <pre class="text-xs bg-white p-2 rounded border overflow-auto max-h-40">{{validatedJsonData}}</pre>
+            </div>
           </div>
 
 
