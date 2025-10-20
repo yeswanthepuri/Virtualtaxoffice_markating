@@ -10,6 +10,12 @@ import { environment } from '../../../environments/environment';
       
       <!-- Resource List View -->
       <div *ngIf="!showForm && !showSectionForm">
+        <div class="mb-4">
+          <button (click)="addResource()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            Add New Resource
+          </button>
+        </div>
+        
         <div *ngFor="let resource of resources" class="mb-6">
           <div class="bg-white border rounded-lg">
             <!-- Resource Header -->
@@ -89,76 +95,16 @@ import { environment } from '../../../environments/environment';
         </div>
 
         <form (ngSubmit)="saveResource()" class="space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Link Description (50 chars)</label>
-              <input [(ngModel)]="currentResource.linkDescription" name="linkDescription" 
-                     maxlength="50" class="w-full border rounded px-3 py-2" required>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Link Short Description (100 chars)</label>
-              <input [(ngModel)]="currentResource.linkShortDescription" name="linkShortDescription" 
-                     maxlength="100" class="w-full border rounded px-3 py-2" required>
-            </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <input [(ngModel)]="currentResource.title" name="title" 
+                   class="w-full border rounded px-3 py-2" required>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Resource Title (500 chars)</label>
-            <input [(ngModel)]="currentResource.resourceTitle" name="resourceTitle" 
-                   maxlength="500" class="w-full border rounded px-3 py-2" required>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Resource Short Description (5000 chars)</label>
-            <textarea [(ngModel)]="currentResource.resourceShortDescription" name="resourceShortDescription" 
-                      maxlength="5000" rows="3" class="w-full border rounded px-3 py-2" required></textarea>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Resource Details (10000 chars)</label>
-            <textarea [(ngModel)]="currentResource.resourceDetails" name="resourceDetails" 
-                      maxlength="10000" rows="6" class="w-full border rounded px-3 py-2" required></textarea>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select [(ngModel)]="currentResource.status" name="status" class="w-full border rounded px-3 py-2" required>
-              <option value="Draft">Draft</option>
-              <option value="Published">Published</option>
-              <option value="Archive">Archive</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Excel File (Optional)</label>
-            <input type="file" (change)="onFileSelect($event)" accept=".xlsx,.xls" 
-                   class="w-full border rounded px-3 py-2">
-            <div *ngIf="selectedFile" class="mt-2 p-2 rounded text-sm" [ngClass]="{
-              'bg-blue-50': validationStatus === 'validating',
-              'bg-green-50': validationStatus === 'valid',
-              'bg-red-50': validationStatus === 'invalid'
-            }">
-              <strong>Selected:</strong> {{selectedFile.name}} ({{(selectedFile.size / 1024).toFixed(2)}} KB)
-              <div class="mt-1 text-xs" [ngClass]="{
-                'text-blue-600': validationStatus === 'validating',
-                'text-green-600': validationStatus === 'valid',
-                'text-red-600': validationStatus === 'invalid'
-              }">
-                <span *ngIf="validationStatus === 'validating'">Validating...</span>
-                <span *ngIf="validationStatus === 'valid'">✓ File validated successfully</span>
-                <div *ngIf="validationStatus === 'invalid'">
-                  <div>✗ Validation failed:</div>
-                  <ul class="list-disc list-inside mt-1">
-                    <li *ngFor="let error of validationErrors">{{error}}</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            
-            <div *ngIf="validatedJsonData" class="mt-2 p-3 bg-gray-50 rounded border">
-              <div class="text-sm font-medium text-gray-700 mb-2">JSON Response:</div>
-              <pre class="text-xs bg-white p-2 rounded border overflow-auto max-h-40">{{validatedJsonData}}</pre>
-            </div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea [(ngModel)]="currentResource.description" name="description" 
+                      rows="3" class="w-full border rounded px-3 py-2"></textarea>
           </div>
 
           <div class="flex space-x-4">
@@ -212,13 +158,9 @@ export class ResourceManagementComponent implements OnInit {
   validationErrors: string[] = [];
   
   currentResource = {
-    id: 0,
-    linkDescription: '',
-    linkShortDescription: '',
-    resourceTitle: '',
-    resourceShortDescription: '',
-    resourceDetails: '',
-    status: 'Draft',
+    resourceId: 0,
+    title: '',
+    description: '',
     createdAt: new Date()
   };
 
@@ -276,10 +218,10 @@ export class ResourceManagementComponent implements OnInit {
     if (!this.newSectionTitle.trim()) return;
     
     const sectionData = {
-      resourceId: resourceId,
       parentSectionId: this.selectedParentSection || null,
       title: this.newSectionTitle,
-      description: this.newSectionDescription
+      description: this.newSectionDescription,
+      sortOrder: 0
     };
 
     this.http.post<any>(`${environment.apiUrl}/resource/${resourceId}/sections`, sectionData)
@@ -300,7 +242,14 @@ export class ResourceManagementComponent implements OnInit {
   }
 
   updateSection() {
-    this.http.put<any>(`${environment.apiUrl}/resource/sections/${this.currentSection.id}`, this.currentSection)
+    const sectionData = {
+      parentSectionId: this.currentSection.parentSectionId,
+      title: this.currentSection.title,
+      description: this.currentSection.description,
+      sortOrder: this.currentSection.sortOrder || 0
+    };
+    
+    this.http.put<any>(`${environment.apiUrl}/resource/sections/${this.currentSection.sectionId}`, sectionData)
       .subscribe({
         next: () => {
           this.loadSections();
@@ -339,21 +288,14 @@ export class ResourceManagementComponent implements OnInit {
   }
 
   saveResourceWithData(jsonData: string | null) {
-    const formData = new FormData();
-    formData.append('LinkDescription', this.currentResource.linkDescription);
-    formData.append('LinkShortDescription', this.currentResource.linkShortDescription);
-    formData.append('ResourceTitle', this.currentResource.resourceTitle);
-    formData.append('ResourceShortDescription', this.currentResource.resourceShortDescription);
-    formData.append('ResourceDetails', this.currentResource.resourceDetails);
-    formData.append('Status', this.currentResource.status);
-    
-    if (jsonData) {
-      formData.append('JsonData', jsonData);
-    }
+    const resourceData = {
+      title: this.currentResource.title,
+      description: this.currentResource.description
+    };
 
     const request = this.isEditing 
-      ? this.http.put<any>(`${environment.apiUrl}/resource/${this.currentResource.id}`, formData)
-      : this.http.post<any>(`${environment.apiUrl}/resource`, formData);
+      ? this.http.put<any>(`${environment.apiUrl}/resource/${this.currentResource.resourceId}`, resourceData)
+      : this.http.post<any>(`${environment.apiUrl}/resource`, resourceData);
 
     request.subscribe({
       next: () => {
@@ -382,13 +324,9 @@ export class ResourceManagementComponent implements OnInit {
 
   resetForm() {
     this.currentResource = {
-      id: 0,
-      linkDescription: '',
-      linkShortDescription: '',
-      resourceTitle: '',
-      resourceShortDescription: '',
-      resourceDetails: '',
-      status: 'Draft',
+      resourceId: 0,
+      title: '',
+      description: '',
       createdAt: new Date()
     };
     this.selectedFile = null;
