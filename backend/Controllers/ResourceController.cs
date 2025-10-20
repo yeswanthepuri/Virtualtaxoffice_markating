@@ -128,6 +128,47 @@ namespace Backend.Controllers
             await _cacheService.InvalidateCacheAsync();
             return Ok(new { message = "Resource cache cleared successfully" });
         }
+
+        [HttpGet("sections")]
+        public async Task<ActionResult<IEnumerable<ResourceSection>>> GetAllSections()
+        {
+            return await _context.ResourceSections.ToListAsync();
+        }
+
+        [HttpPost("{resourceId}/sections")]
+        public async Task<ActionResult<ResourceSection>> AddSection(int resourceId, [FromBody] CreateSectionRequest request)
+        {
+            if (!await _context.Resources.AnyAsync(r => r.Id == resourceId))
+                return NotFound("Resource not found");
+
+            var section = new ResourceSection
+            {
+                ResourceId = resourceId,
+                ParentSectionId = request.ParentSectionId,
+                Title = request.Title,
+                Description = request.Description,
+                SortOrder = request.SortOrder
+            };
+            
+            _context.ResourceSections.Add(section);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetResource), new { id = resourceId }, section);
+        }
+
+        [HttpPut("sections/{sectionId}")]
+        public async Task<IActionResult> UpdateSection(int sectionId, [FromBody] CreateSectionRequest request)
+        {
+            var section = await _context.ResourceSections.FindAsync(sectionId);
+            if (section == null) return NotFound();
+            
+            section.Title = request.Title;
+            section.Description = request.Description;
+            section.SortOrder = request.SortOrder;
+            section.UpdatedAt = DateTime.UtcNow;
+            
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
     }
 
     public class CreateResourceRequest
@@ -139,5 +180,13 @@ namespace Backend.Controllers
         public string ResourceDetails { get; set; } = string.Empty;
         public ResourceStatus Status { get; set; } = ResourceStatus.Draft;
         public string? JsonData { get; set; }
+    }
+
+    public class CreateSectionRequest
+    {
+        public int? ParentSectionId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public int SortOrder { get; set; } = 0;
     }
 }

@@ -17,6 +17,7 @@ namespace MarketingSite.Data
         public DbSet<ArticleDetails> ArticleDetails { get; set; }
         public DbSet<Resource> Resources { get; set; }
         public DbSet<ResourceDetails> ResourceDetails { get; set; }
+        public DbSet<ResourceSection> ResourceSections { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<State> States { get; set; }
 
@@ -47,6 +48,20 @@ namespace MarketingSite.Data
                       .WithMany()
                       .HasForeignKey(rd => rd.ResourceId)
                       .OnDelete(DeleteBehavior.Cascade);
+            });
+            
+            // Configure ResourceSection relationships
+            builder.Entity<ResourceSection>(entity =>
+            {
+                entity.HasOne(rs => rs.Resource)
+                      .WithMany()
+                      .HasForeignKey(rs => rs.ResourceId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                      
+                entity.HasOne(rs => rs.ParentSection)
+                      .WithMany(rs => rs.SubSections)
+                      .HasForeignKey(rs => rs.ParentSectionId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
             
             // Configure State-Country relationship

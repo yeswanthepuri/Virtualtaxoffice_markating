@@ -9,39 +9,79 @@ import { environment } from '../../../environments/environment';
       <h2 class="text-2xl font-bold mb-6">Resource Management</h2>
       
       <!-- Resource List View -->
-      <div *ngIf="!showForm">
+      <div *ngIf="!showForm && !showSectionForm">
         <div class="mb-4">
-          <button (click)="addResource()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          <button (click)="addResource()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2">
             Add New Resource
           </button>
         </div>
 
-        <div class="bg-white shadow rounded-lg">
-          <table class="min-w-full">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Link Description</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr *ngFor="let resource of resources">
-                <td class="px-6 py-4">{{resource.resourceTitle}}</td>
-                <td class="px-6 py-4">{{resource.linkDescription}}</td>
-                <td class="px-6 py-4">
-                  <span [class]="getStatusClass(resource.status)">{{resource.status}}</span>
-                </td>
-                <td class="px-6 py-4">{{resource.createdAt | date:'short'}}</td>
-                <td class="px-6 py-4 space-x-2">
-                  <button (click)="editResource(resource)" class="text-blue-600 hover:text-blue-800">Edit</button>
-                  <button (click)="deleteResource(resource.id)" class="text-red-600 hover:text-red-800">Delete</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="space-y-4">
+          <div *ngFor="let resource of resources" class="bg-white shadow rounded-lg">
+            <div class="p-4 border-b flex justify-between items-center">
+              <div>
+                <h3 class="text-lg font-semibold text-blue-600">{{resource.resourceTitle}}</h3>
+                <p class="text-sm text-gray-600">{{resource.linkShortDescription}}</p>
+                <p class="text-xs text-gray-500">Created: {{resource.createdAt | date:'short'}}</p>
+              </div>
+              <div class="flex space-x-2">
+                <button (click)="editResource(resource)" class="text-green-500 hover:text-green-700 text-sm">Edit</button>
+                <button (click)="deleteResource(resource.id)" class="text-red-500 hover:text-red-700 text-sm">Delete</button>
+                <button (click)="toggleSections(resource.id)" class="text-blue-500 hover:text-blue-700 text-sm">
+                  {{resource.showSections ? 'Hide Sections' : 'Show Sections'}}
+                </button>
+              </div>
+            </div>
+            
+            <!-- Sections -->
+            <div *ngIf="resource.showSections" class="p-4">
+              <div class="mb-4">
+                <h4 class="text-md font-medium mb-2">Add Section</h4>
+                <div class="flex space-x-2">
+                  <input [(ngModel)]="newSectionTitle" placeholder="Section title" class="border rounded px-3 py-2 flex-1">
+                  <select [(ngModel)]="selectedParentSection" class="border rounded px-3 py-2">
+                    <option value="">Root Section</option>
+                    <option *ngFor="let section of getResourceSections(resource.id)" [value]="section.id">
+                      {{section.title}}
+                    </option>
+                  </select>
+                  <button (click)="addSection(resource.id)" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Add Section
+                  </button>
+                </div>
+                <textarea [(ngModel)]="newSectionDescription" placeholder="Section description (optional)" 
+                         class="w-full border rounded px-3 py-2 mt-2" rows="2"></textarea>
+              </div>
+              
+              <div class="mb-4">
+                <h4 class="text-md font-medium mb-2">Resource Structure</h4>
+                <div class="space-y-2">
+                  <div *ngFor="let section of getRootSections(resource.id)" class="ml-4">
+                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <div>
+                        <span class="font-medium">{{section.title}}</span>
+                        <p class="text-sm text-gray-600" *ngIf="section.description">{{section.description}}</p>
+                      </div>
+                      <div class="flex space-x-2">
+                        <button (click)="editSection(section)" class="text-green-500 hover:text-green-700 text-sm">Edit</button>
+                      </div>
+                    </div>
+                    <div *ngFor="let subSection of section.subSections" class="ml-8 mt-2">
+                      <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
+                        <div>
+                          <span class="text-sm">{{subSection.title}}</span>
+                          <p class="text-xs text-gray-600" *ngIf="subSection.description">{{subSection.description}}</p>
+                        </div>
+                        <div class="flex space-x-2">
+                          <button (click)="editSection(subSection)" class="text-green-500 hover:text-green-700 text-xs">Edit</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -135,6 +175,33 @@ import { environment } from '../../../environments/environment';
           </div>
         </form>
       </div>
+
+      <!-- Section Edit Form -->
+      <div *ngIf="showSectionForm" class="bg-white shadow rounded-lg p-6 mt-4">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-semibold">Edit Section</h3>
+          <button (click)="cancelSectionForm()" class="text-gray-500 hover:text-gray-700">✕</button>
+        </div>
+
+        <form (ngSubmit)="updateSection()" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Section Title</label>
+            <input [(ngModel)]="currentSection.title" name="title" class="w-full border rounded px-3 py-2" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Section Description</label>
+            <textarea [(ngModel)]="currentSection.description" name="description" rows="3" class="w-full border rounded px-3 py-2"></textarea>
+          </div>
+          <div class="flex space-x-4">
+            <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
+              Update Section
+            </button>
+            <button type="button" (click)="cancelSectionForm()" class="bg-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-400">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   `
 })
@@ -160,17 +227,96 @@ export class ResourceManagementComponent implements OnInit {
   };
 
   resources: any[] = [];
+  sections: any[] = [];
+  showSectionForm = false;
+  newSectionTitle = '';
+  newSectionDescription = '';
+  selectedParentSection = '';
+  currentSection: any = null;
 
   ngOnInit() {
     this.loadResources();
+    this.loadSections();
   }
 
   loadResources() {
     this.http.get<any[]>(`${environment.apiUrl}/resource`)
       .subscribe({
-        next: data => this.resources = data,
+        next: data => {
+          this.resources = data.map(r => ({...r, showSections: false}));
+        },
         error: error => console.error('Error loading resources:', error)
       });
+  }
+
+  loadSections() {
+    this.http.get<any[]>(`${environment.apiUrl}/resource/sections`)
+      .subscribe({
+        next: data => this.sections = data,
+        error: error => console.error('Error loading sections:', error)
+      });
+  }
+
+  toggleSections(resourceId: number) {
+    const resource = this.resources.find(r => r.id === resourceId);
+    if (resource) {
+      resource.showSections = !resource.showSections;
+    }
+  }
+
+  getResourceSections(resourceId: number) {
+    return this.sections.filter(s => s.resourceId === resourceId && !s.parentSectionId);
+  }
+
+  getRootSections(resourceId: number) {
+    const rootSections = this.sections.filter(s => s.resourceId === resourceId && !s.parentSectionId);
+    return rootSections.map(section => ({
+      ...section,
+      subSections: this.sections.filter(s => s.parentSectionId === section.id)
+    }));
+  }
+
+  addSection(resourceId: number) {
+    if (!this.newSectionTitle.trim()) return;
+    
+    const sectionData = {
+      resourceId: resourceId,
+      parentSectionId: this.selectedParentSection || null,
+      title: this.newSectionTitle,
+      description: this.newSectionDescription
+    };
+
+    this.http.post<any>(`${environment.apiUrl}/resource/${resourceId}/sections`, sectionData)
+      .subscribe({
+        next: () => {
+          this.loadSections();
+          this.newSectionTitle = '';
+          this.newSectionDescription = '';
+          this.selectedParentSection = '';
+        },
+        error: error => alert('Error adding section: ' + error.message)
+      });
+  }
+
+  editSection(section: any) {
+    this.currentSection = {...section};
+    this.showSectionForm = true;
+  }
+
+  updateSection() {
+    this.http.put<any>(`${environment.apiUrl}/resource/sections/${this.currentSection.id}`, this.currentSection)
+      .subscribe({
+        next: () => {
+          this.loadSections();
+          this.cancelSectionForm();
+        },
+        error: error => alert('Error updating section: ' + error.message)
+      });
+  }
+
+  cancelSectionForm() {
+    this.showSectionForm = false;
+    this.currentSection = null;
   }
 
   addResource() {
