@@ -20,10 +20,12 @@ import { RoleMaintenanceComponent } from './components/admin/role-maintenance.co
 import { PolicyMaintenanceComponent } from './components/admin/policy-maintenance.component';
 import { PartnerManagementComponent } from './components/admin/partner-management.component';
 import { ArticleManagementComponent } from './components/admin/article-management.component';
+import { ResourceManagementComponent } from './components/admin/resource-management.component';
+import { CacheManagementComponent } from './components/admin/cache-management.component';
 import { LocationMaintenanceComponent } from './components/admin/location-maintenance.component';
 import { PartnersComponent } from './components/partners/partners.component';
 import { PublicRegisterComponent } from './components/public-register/public-register.component';
-import { ResourcesComponent } from './components/resources/resources.component';
+import { ResourcesComponent } from './components/home/resources.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +42,8 @@ import { ResourcesComponent } from './components/resources/resources.component';
     PolicyMaintenanceComponent,
     PartnerManagementComponent,
     ArticleManagementComponent,
+    ResourceManagementComponent,
+    CacheManagementComponent,
     LocationMaintenanceComponent,
     PartnersComponent,
     PublicRegisterComponent,
