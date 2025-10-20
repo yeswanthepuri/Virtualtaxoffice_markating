@@ -55,6 +55,12 @@ import { Component, OnInit } from '@angular/core';
                class="block py-2 px-3 text-gray-700 hover:text-blue-600 cursor-pointer ml-2">
               Article Management
             </a>
+            <a (click)="activeTab = 'resources'" 
+               [class.text-blue-600]="activeTab === 'resources'"
+               [class.font-semibold]="activeTab === 'resources'"
+               class="block py-2 px-3 text-gray-700 hover:text-blue-600 cursor-pointer ml-2">
+              Resource Management
+            </a>
           </div>
 
           <!-- Business -->
@@ -65,6 +71,17 @@ import { Component, OnInit } from '@angular/core';
                [class.font-semibold]="activeTab === 'partners'"
                class="block py-2 px-3 text-gray-700 hover:text-blue-600 cursor-pointer ml-2">
               Partner Management
+            </a>
+          </div>
+
+          <!-- System -->
+          <div class="mb-4">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase mb-2">System</h3>
+            <a (click)="activeTab = 'cache'" 
+               [class.text-blue-600]="activeTab === 'cache'"
+               [class.font-semibold]="activeTab === 'cache'"
+               class="block py-2 px-3 text-gray-700 hover:text-blue-600 cursor-pointer ml-2">
+              Cache Management
             </a>
           </div>
 
@@ -80,7 +97,9 @@ import { Component, OnInit } from '@angular/core';
         <app-policy-maintenance *ngIf="activeTab === 'policies'"></app-policy-maintenance>
         <app-partner-management *ngIf="activeTab === 'partners'"></app-partner-management>
         <app-article-management *ngIf="activeTab === 'articles'"></app-article-management>
+        <app-resource-management *ngIf="activeTab === 'resources'"></app-resource-management>
         <app-location-maintenance *ngIf="activeTab === 'locations'"></app-location-maintenance>
+        <app-cache-management *ngIf="activeTab === 'cache'"></app-cache-management>
       </div>
     </div>
   `
