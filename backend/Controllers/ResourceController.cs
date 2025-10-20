@@ -27,7 +27,7 @@ namespace Backend.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Resource>> GetResource(int id)
+        public async Task<ActionResult<Resource>> GetResource(long id)
         {
             var resource = await _context.Resources.FindAsync(id);
             if (resource == null) return NotFound();
@@ -35,60 +35,30 @@ namespace Backend.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Resource>> CreateResource([FromForm] CreateResourceRequest request, IFormFile? file)
+        public async Task<ActionResult<Resource>> CreateResource([FromBody] CreateResourceRequest request)
         {
             var resource = new Resource
             {
-                LinkDescription = request.LinkDescription,
-                LinkShortDescription = request.LinkShortDescription,
-                ResourceTitle = request.ResourceTitle,
-                ResourceShortDescription = request.ResourceShortDescription,
-                ResourceDetails = request.ResourceDetails,
-                Status = request.Status
+                Title = request.Title,
+                Description = request.Description
             };
 
             _context.Resources.Add(resource);
             await _context.SaveChangesAsync();
 
-            // Store JSON data if provided (from validated Excel data)
-            if (!string.IsNullOrEmpty(request.JsonData))
-            {
-                var resourceDetails = new ResourceDetails
-                {
-                    ResourceId = resource.Id,
-                    JsonData = request.JsonData
-                };
-                _context.ResourceDetails.Add(resourceDetails);
-                await _context.SaveChangesAsync();
-            }
-
             await _cacheService.InvalidateCacheAsync();
-            return CreatedAtAction(nameof(GetResource), new { id = resource.Id }, resource);
+            return CreatedAtAction(nameof(GetResource), new { id = resource.ResourceId }, resource);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateResource(int id, [FromForm] CreateResourceRequest request, IFormFile? file)
+        public async Task<IActionResult> UpdateResource(long id, [FromBody] CreateResourceRequest request)
         {
             var resource = await _context.Resources.FindAsync(id);
             if (resource == null) return NotFound();
 
-            resource.LinkDescription = request.LinkDescription;
-            resource.LinkShortDescription = request.LinkShortDescription;
-            resource.ResourceTitle = request.ResourceTitle;
-            resource.ResourceShortDescription = request.ResourceShortDescription;
-            resource.ResourceDetails = request.ResourceDetails;
-            resource.Status = request.Status;
+            resource.Title = request.Title;
+            resource.Description = request.Description;
             resource.UpdatedAt = DateTime.UtcNow;
-
-            // Store JSON data if provided (from validated Excel data)
-            if (!string.IsNullOrEmpty(request.JsonData))
-            {
-                var existingDetails = await _context.ResourceDetails.FirstOrDefaultAsync(rd => rd.ResourceId == id);
-                if (existingDetails != null)
-                    existingDetails.JsonData = request.JsonData;
-                else
-                    _context.ResourceDetails.Add(new ResourceDetails { ResourceId = id, JsonData = request.JsonData });
-            }
 
             await _context.SaveChangesAsync();
             await _cacheService.InvalidateCacheAsync();
@@ -96,7 +66,7 @@ namespace Backend.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteResource(int id)
+        public async Task<IActionResult> DeleteResource(long id)
         {
             var resource = await _context.Resources.FindAsync(id);
             if (resource == null) return NotFound();
@@ -107,12 +77,7 @@ namespace Backend.Controllers
             return NoContent();
         }
 
-        [HttpGet("{id}/details")]
-        public async Task<ActionResult<string>> GetResourceDetails(int id)
-        {
-            var details = await _context.ResourceDetails.FirstOrDefaultAsync(rd => rd.ResourceId == id);
-            return details?.JsonData ?? "";
-        }
+
 
         [HttpGet("published")]
         [AllowAnonymous]
@@ -136,9 +101,9 @@ namespace Backend.Controllers
         }
 
         [HttpPost("{resourceId}/sections")]
-        public async Task<ActionResult<ResourceSection>> AddSection(int resourceId, [FromBody] CreateSectionRequest request)
+        public async Task<ActionResult<ResourceSection>> AddSection(long resourceId, [FromBody] CreateSectionRequest request)
         {
-            if (!await _context.Resources.AnyAsync(r => r.Id == resourceId))
+            if (!await _context.Resources.AnyAsync(r => r.ResourceId == resourceId))
                 return NotFound("Resource not found");
 
             var section = new ResourceSection
@@ -156,7 +121,7 @@ namespace Backend.Controllers
         }
 
         [HttpPut("sections/{sectionId}")]
-        public async Task<IActionResult> UpdateSection(int sectionId, [FromBody] CreateSectionRequest request)
+        public async Task<IActionResult> UpdateSection(long sectionId, [FromBody] CreateSectionRequest request)
         {
             var section = await _context.ResourceSections.FindAsync(sectionId);
             if (section == null) return NotFound();
@@ -173,18 +138,13 @@ namespace Backend.Controllers
 
     public class CreateResourceRequest
     {
-        public string LinkDescription { get; set; } = string.Empty;
-        public string LinkShortDescription { get; set; } = string.Empty;
-        public string ResourceTitle { get; set; } = string.Empty;
-        public string ResourceShortDescription { get; set; } = string.Empty;
-        public string ResourceDetails { get; set; } = string.Empty;
-        public ResourceStatus Status { get; set; } = ResourceStatus.Draft;
-        public string? JsonData { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string? Description { get; set; }
     }
 
     public class CreateSectionRequest
     {
-        public int? ParentSectionId { get; set; }
+        public long? ParentSectionId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public int SortOrder { get; set; } = 0;

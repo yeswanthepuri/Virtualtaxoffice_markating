@@ -29,7 +29,6 @@ namespace Backend.Services
             }
 
             var resources = await _context.Resources
-                .Where(r => r.Status == ResourceStatus.Published)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
 

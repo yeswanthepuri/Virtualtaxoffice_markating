@@ -10,72 +10,68 @@ import { environment } from '../../../environments/environment';
       
       <!-- Resource List View -->
       <div *ngIf="!showForm && !showSectionForm">
-        <div class="mb-4">
-          <button (click)="addResource()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2">
-            Add New Resource
-          </button>
-        </div>
-
-        <div class="space-y-4">
-          <div *ngFor="let resource of resources" class="bg-white shadow rounded-lg">
+        <div *ngFor="let resource of resources" class="mb-6">
+          <div class="bg-white border rounded-lg">
+            <!-- Resource Header -->
             <div class="p-4 border-b flex justify-between items-center">
               <div>
-                <h3 class="text-lg font-semibold text-blue-600">{{resource.resourceTitle}}</h3>
-                <p class="text-sm text-gray-600">{{resource.linkShortDescription}}</p>
-                <p class="text-xs text-gray-500">Created: {{resource.createdAt | date:'short'}}</p>
+                <h3 class="text-lg font-semibold text-blue-600">{{resource.title}}</h3>
+                <p class="text-sm text-gray-600">{{resource.description}}</p>
+                <p class="text-xs text-gray-500">Created: {{resource.createdAt | date:'M/d/yy, h:mm a'}}</p>
               </div>
               <div class="flex space-x-2">
                 <button (click)="editResource(resource)" class="text-green-500 hover:text-green-700 text-sm">Edit</button>
-                <button (click)="deleteResource(resource.id)" class="text-red-500 hover:text-red-700 text-sm">Delete</button>
-                <button (click)="toggleSections(resource.id)" class="text-blue-500 hover:text-blue-700 text-sm">
+                <button (click)="deleteResource(resource.resourceId)" class="text-red-500 hover:text-red-700 text-sm">Delete</button>
+                <button (click)="toggleSections(resource.resourceId)" class="text-blue-500 hover:text-blue-700 text-sm">
                   {{resource.showSections ? 'Hide Sections' : 'Show Sections'}}
                 </button>
               </div>
             </div>
             
-            <!-- Sections -->
-            <div *ngIf="resource.showSections" class="p-4">
-              <div class="mb-4">
-                <h4 class="text-md font-medium mb-2">Add Section</h4>
-                <div class="flex space-x-2">
-                  <input [(ngModel)]="newSectionTitle" placeholder="Section title" class="border rounded px-3 py-2 flex-1">
-                  <select [(ngModel)]="selectedParentSection" class="border rounded px-3 py-2">
-                    <option value="">Root Section</option>
-                    <option *ngFor="let section of getResourceSections(resource.id)" [value]="section.id">
-                      {{section.title}}
-                    </option>
-                  </select>
-                  <button (click)="addSection(resource.id)" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                    Add Section
-                  </button>
-                </div>
-                <textarea [(ngModel)]="newSectionDescription" placeholder="Section description (optional)" 
-                         class="w-full border rounded px-3 py-2 mt-2" rows="2"></textarea>
+            <!-- Add Section Form -->
+            <div *ngIf="resource.showSections" class="p-4 bg-gray-50">
+              <h4 class="font-medium mb-3">Add Section</h4>
+              <div class="grid grid-cols-2 gap-3 mb-3">
+                <input [(ngModel)]="newSectionTitle" placeholder="Section title" 
+                       class="border rounded px-3 py-2">
+                <select [(ngModel)]="selectedParentSection" class="border rounded px-3 py-2">
+                  <option value="">Root Section</option>
+                  <option *ngFor="let section of getResourceSections(resource.resourceId)" [value]="section.sectionId">
+                    {{section.title}}
+                  </option>
+                </select>
               </div>
-              
-              <div class="mb-4">
-                <h4 class="text-md font-medium mb-2">Resource Structure</h4>
-                <div class="space-y-2">
-                  <div *ngFor="let section of getRootSections(resource.id)" class="ml-4">
-                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
-                      <div>
-                        <span class="font-medium">{{section.title}}</span>
-                        <p class="text-sm text-gray-600" *ngIf="section.description">{{section.description}}</p>
-                      </div>
-                      <div class="flex space-x-2">
-                        <button (click)="editSection(section)" class="text-green-500 hover:text-green-700 text-sm">Edit</button>
-                      </div>
+              <textarea [(ngModel)]="newSectionDescription" placeholder="Section description (optional)" 
+                       class="w-full border rounded px-3 py-2 mb-3" rows="2"></textarea>
+              <button (click)="addSection(resource.resourceId)" 
+                      class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                Add Section
+              </button>
+            </div>
+            
+            <!-- Resource Structure -->
+            <div *ngIf="resource.showSections" class="p-4">
+              <h4 class="font-medium mb-3">Resource Structure</h4>
+              <div class="space-y-2">
+                <div *ngFor="let section of getRootSections(resource.resourceId)">
+                  <div class="flex justify-between items-center p-2 hover:bg-gray-50">
+                    <div class="flex-1">
+                      <div class="font-medium">{{section.title}}</div>
+                      <div class="text-sm text-gray-600" *ngIf="section.description">{{section.description}}</div>
                     </div>
-                    <div *ngFor="let subSection of section.subSections" class="ml-8 mt-2">
-                      <div class="flex justify-between items-center p-2 bg-gray-100 rounded">
+                    <button (click)="editSection(section)" class="text-green-500 hover:text-green-700 text-sm">Edit</button>
+                  </div>
+                  <!-- Subsections -->
+                  <div *ngFor="let subSection of section.subSections" class="ml-6">
+                    <div class="flex justify-between items-center p-2 hover:bg-gray-50">
+                      <div class="flex items-center flex-1">
+                        <span class="text-blue-500 mr-2">•</span>
                         <div>
-                          <span class="text-sm">{{subSection.title}}</span>
-                          <p class="text-xs text-gray-600" *ngIf="subSection.description">{{subSection.description}}</p>
-                        </div>
-                        <div class="flex space-x-2">
-                          <button (click)="editSection(subSection)" class="text-green-500 hover:text-green-700 text-xs">Edit</button>
+                          <div class="text-sm font-medium">{{subSection.title}}</div>
+                          <div class="text-xs text-gray-600" *ngIf="subSection.description">{{subSection.description}}</div>
                         </div>
                       </div>
+                      <button (click)="editSection(subSection)" class="text-green-500 hover:text-green-700 text-xs">Edit</button>
                     </div>
                   </div>
                 </div>

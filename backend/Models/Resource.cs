@@ -1,45 +1,27 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models
 {
-    public enum ResourceStatus
-    {
-        Draft,
-        Published,
-        Archive
-    }
-
+    [Table("resources")]
     public class Resource
     {
-        public int Id { get; set; }
+        [Key]
+        [Column("resource_id")]
+        public long ResourceId { get; set; }
         
-        [MaxLength(50)]
-        public string LinkDescription { get; set; } = string.Empty;
+        [Required]
+        [MaxLength(255)]
+        public string Title { get; set; } = string.Empty;
         
-        [MaxLength(100)]
-        public string LinkShortDescription { get; set; } = string.Empty;
+        public string? Description { get; set; }
         
-        [MaxLength(500)]
-        public string ResourceTitle { get; set; } = string.Empty;
-        
-        [MaxLength(5000)]
-        public string ResourceShortDescription { get; set; } = string.Empty;
-        
-        [MaxLength(10000)]
-        public string ResourceDetails { get; set; } = string.Empty;
-        
-        public ResourceStatus Status { get; set; } = ResourceStatus.Draft;
-        
+        [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    }
-
-    public class ResourceDetails
-    {
-        public int Id { get; set; }
-        public int ResourceId { get; set; }
-        public string JsonData { get; set; } = string.Empty;
         
-        public Resource Resource { get; set; } = null!;
+        [Column("updated_at")]
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        
+        public ICollection<ResourceSection> Sections { get; set; } = new List<ResourceSection>();
     }
 }
