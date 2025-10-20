@@ -15,6 +15,8 @@ namespace MarketingSite.Data
         public DbSet<User> SimpleUsers { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<ArticleDetails> ArticleDetails { get; set; }
+        public DbSet<Resource> Resources { get; set; }
+        public DbSet<ResourceDetails> ResourceDetails { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<State> States { get; set; }
 
@@ -35,6 +37,15 @@ namespace MarketingSite.Data
                 entity.HasOne(ad => ad.Article)
                       .WithMany()
                       .HasForeignKey(ad => ad.ArticleId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+            
+            // Configure ResourceDetails relationship
+            builder.Entity<ResourceDetails>(entity =>
+            {
+                entity.HasOne(rd => rd.Resource)
+                      .WithMany()
+                      .HasForeignKey(rd => rd.ResourceId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
             

@@ -19,6 +19,7 @@ services:
     depends_on:
       - database
       - minio
+      - redis
     environment:
       - ConnectionStrings__DefaultConnection=Host=database;Database=appdb;Username=user;Password=password
       - MinIO__Endpoint=minio:9000
@@ -30,6 +31,8 @@ services:
       - Jwt__Issuer=https://vtobackend.coolify.marthand.org
       - Jwt__Audience=https://vtobackend.coolify.marthand.org
       - API_BASE_URL=https://vtobackend.coolify.marthand.org
+      - ConnectionStrings__Redis=redis:6379
+      - Redis__InstanceName=vto
     restart: unless-stopped
 
   database:
@@ -61,6 +64,14 @@ services:
       - database
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   minio_data:
+  redis_data:

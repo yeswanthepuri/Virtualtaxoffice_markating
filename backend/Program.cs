@@ -55,6 +55,27 @@ builder.Services.AddSingleton<MarketingSite.Services.MinIOService>();
 // Add Database Initialization Service
 builder.Services.AddScoped<DatabaseInitializationService>();
 
+// Add Resource Cache Service
+builder.Services.AddScoped<Backend.Services.ResourceCacheService>();
+
+// Distributed cache: prefer Redis, fallback to memory cache
+var redisConnection = builder.Configuration.GetConnectionString("Redis")
+    ?? builder.Configuration["Redis:ConnectionString"]
+    ?? Environment.GetEnvironmentVariable("REDIS_CONNECTION");
+
+if (!string.IsNullOrWhiteSpace(redisConnection))
+{
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConnection;
+        options.InstanceName = builder.Configuration["Redis:InstanceName"] ?? "vto:";
+    });
+}
+else
+{
+    builder.Services.AddDistributedMemoryCache();
+}
+
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {

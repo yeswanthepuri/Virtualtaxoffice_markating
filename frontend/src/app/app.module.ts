@@ -23,6 +23,7 @@ import { ArticleManagementComponent } from './components/admin/article-managemen
 import { LocationMaintenanceComponent } from './components/admin/location-maintenance.component';
 import { PartnersComponent } from './components/partners/partners.component';
 import { PublicRegisterComponent } from './components/public-register/public-register.component';
+import { ResourcesComponent } from './components/resources/resources.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,8 @@ import { PublicRegisterComponent } from './components/public-register/public-reg
     ArticleManagementComponent,
     LocationMaintenanceComponent,
     PartnersComponent,
-    PublicRegisterComponent
+    PublicRegisterComponent,
+    ResourcesComponent
   ],
   imports: [
     BrowserModule,

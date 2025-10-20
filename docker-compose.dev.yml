@@ -1,24 +1,38 @@
+version: '3.8'
+
 services:
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
     ports:
       - "4200:80"
     depends_on:
       - backend
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
     ports:
-      - "3000:3000"
+      - "5010:5010"
     depends_on:
       - database
       - minio
+      - redis
     environment:
-      - ConnectionStrings__DefaultConnection=Host=database;Database=appdb;Username=user;Password=password
-      - MinIO__Endpoint=minio:9000
-      - MinIO__AccessKey=minioadmin
-      - MinIO__SecretKey=minioadmin
-      - MinIO__BucketName=uploads
+      - "ConnectionStrings__DefaultConnection=Host=database;Database=appdb;Username=user;Password=password"
+      - "ConnectionStrings__Redis=redis:6379"
+      - "Redis__InstanceName=vto-dev"
+      - "MinIO__Endpoint=minio:9000"
+      - "MinIO__AccessKey=minioadmin"
+      - "MinIO__SecretKey=minioadmin"
+      - "MinIO__BucketName=uploads"
+      - "ASPNETCORE_ENVIRONMENT=Development"
+      - "ASPNETCORE_URLS=http://+:5010"
+      - "Jwt__Key=your-super-secret-jwt-key-here-with-256-bits-minimum-length"
+      - "Jwt__Issuer=http://localhost:5010"
+      - "Jwt__Audience=http://localhost:5010"
+      - "Logging__LogLevel__Default=Debug"
+      - "Logging__LogLevel__Microsoft.EntityFrameworkCore=Information"
 
   database:
     image: postgres:15
@@ -43,5 +57,25 @@ services:
       - app_data:/data
     command: server /data --console-address ":9001"
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - database
+    restart: unless-stopped
+
 volumes:
   app_data:
+  redis_data:
