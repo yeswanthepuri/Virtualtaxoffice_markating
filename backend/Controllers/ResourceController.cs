@@ -112,6 +112,7 @@ namespace Backend.Controllers
                 ParentSectionId = request.ParentSectionId,
                 Title = request.Title,
                 Description = request.Description,
+                DeepLink = request.DeepLink,
                 SortOrder = request.SortOrder
             };
             
@@ -128,6 +129,7 @@ namespace Backend.Controllers
             
             section.Title = request.Title;
             section.Description = request.Description;
+            section.DeepLink = request.DeepLink;
             section.SortOrder = request.SortOrder;
             section.UpdatedAt = DateTime.UtcNow;
             
@@ -147,6 +149,7 @@ namespace Backend.Controllers
         public long? ParentSectionId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
+        public string? DeepLink { get; set; }
         public int SortOrder { get; set; } = 0;
     }
 }
