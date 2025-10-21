@@ -103,38 +103,58 @@ namespace Backend.Controllers
         [HttpPost("{resourceId}/sections")]
         public async Task<ActionResult<ResourceSection>> AddSection(long resourceId, [FromBody] CreateSectionRequest request)
         {
-            if (!await _context.Resources.AnyAsync(r => r.ResourceId == resourceId))
-                return NotFound("Resource not found");
-
-            var section = new ResourceSection
+            try
             {
-                ResourceId = resourceId,
-                ParentSectionId = request.ParentSectionId,
-                Title = request.Title,
-                Description = request.Description,
-                DeepLink = request.DeepLink,
-                SortOrder = request.SortOrder
-            };
-            
-            _context.ResourceSections.Add(section);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetResource), new { id = resourceId }, section);
+                if (!await _context.Resources.AnyAsync(r => r.ResourceId == resourceId))
+                    return NotFound("Resource not found");
+
+                // Validate parent section exists if specified
+                if (request.ParentSectionId.HasValue)
+                {
+                    var parentExists = await _context.ResourceSections.AnyAsync(s => s.SectionId == request.ParentSectionId.Value);
+                    if (!parentExists)
+                        return BadRequest("Parent section not found");
+                }
+
+                var section = new ResourceSection
+                {
+                    ResourceId = resourceId,
+                    ParentSectionId = request.ParentSectionId,
+                    Title = request.Title,
+                    Description = request.Description,
+                    SortOrder = request.SortOrder
+                };
+                
+                _context.ResourceSections.Add(section);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction(nameof(GetResource), new { id = resourceId }, section);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error creating section", error = ex.Message });
+            }
         }
 
         [HttpPut("sections/{sectionId}")]
         public async Task<IActionResult> UpdateSection(long sectionId, [FromBody] CreateSectionRequest request)
         {
-            var section = await _context.ResourceSections.FindAsync(sectionId);
-            if (section == null) return NotFound();
-            
-            section.Title = request.Title;
-            section.Description = request.Description;
-            section.DeepLink = request.DeepLink;
-            section.SortOrder = request.SortOrder;
-            section.UpdatedAt = DateTime.UtcNow;
-            
-            await _context.SaveChangesAsync();
-            return NoContent();
+            try
+            {
+                var section = await _context.ResourceSections.FindAsync(sectionId);
+                if (section == null) return NotFound();
+                
+                section.Title = request.Title;
+                section.Description = request.Description;
+                section.SortOrder = request.SortOrder;
+                section.UpdatedAt = DateTime.UtcNow;
+                
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error updating section", error = ex.Message });
+            }
         }
     }
 
@@ -149,7 +169,6 @@ namespace Backend.Controllers
         public long? ParentSectionId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public string? DeepLink { get; set; }
         public int SortOrder { get; set; } = 0;
     }
 }

@@ -23,9 +23,6 @@ namespace Backend.Models
         
         public string? Description { get; set; }
         
-        [Column("deep_link")]
-        public string? DeepLink { get; set; }
-        
         [Column("sort_order")]
         public int SortOrder { get; set; }
         

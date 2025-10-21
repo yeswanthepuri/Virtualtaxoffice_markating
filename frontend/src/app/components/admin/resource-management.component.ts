@@ -48,8 +48,7 @@ import { environment } from '../../../environments/environment';
               </div>
               <textarea [(ngModel)]="newSectionDescription" placeholder="Section description (optional)" 
                        class="w-full border rounded px-3 py-2 mb-3" rows="2"></textarea>
-              <input [(ngModel)]="newSectionDeepLink" placeholder="Deep link URL (optional)" 
-                     type="url" class="w-full border rounded px-3 py-2 mb-3">
+
               <button (click)="addSection(resource.resourceId)" 
                       class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
                 Add Section
@@ -65,9 +64,7 @@ import { environment } from '../../../environments/environment';
                     <div class="flex-1">
                       <div class="font-medium">{{section.title}}</div>
                       <div class="text-sm text-gray-600" *ngIf="section.description">{{section.description}}</div>
-                      <div class="text-xs text-blue-600" *ngIf="section.deepLink">
-                        <a [href]="section.deepLink" target="_blank" class="hover:underline">{{section.deepLink}}</a>
-                      </div>
+
                     </div>
                     <button (click)="editSection(section)" class="text-green-500 hover:text-green-700 text-sm">Edit</button>
                   </div>
@@ -79,9 +76,7 @@ import { environment } from '../../../environments/environment';
                         <div>
                           <div class="text-sm font-medium">{{subSection.title}}</div>
                           <div class="text-xs text-gray-600" *ngIf="subSection.description">{{subSection.description}}</div>
-                          <div class="text-xs text-blue-600" *ngIf="subSection.deepLink">
-                            <a [href]="subSection.deepLink" target="_blank" class="hover:underline">{{subSection.deepLink}}</a>
-                          </div>
+
                         </div>
                       </div>
                       <button (click)="editSection(subSection)" class="text-green-500 hover:text-green-700 text-xs">Edit</button>
@@ -141,11 +136,7 @@ import { environment } from '../../../environments/environment';
             <label class="block text-sm font-medium text-gray-700 mb-1">Section Description</label>
             <textarea [(ngModel)]="currentSection.description" name="description" rows="3" class="w-full border rounded px-3 py-2"></textarea>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Deep Link URL (Optional)</label>
-            <input [(ngModel)]="currentSection.deepLink" name="deepLink" type="url" 
-                   placeholder="https://example.com" class="w-full border rounded px-3 py-2">
-          </div>
+
           <div class="flex space-x-4">
             <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
               Update Section
@@ -181,7 +172,7 @@ export class ResourceManagementComponent implements OnInit {
   showSectionForm = false;
   newSectionTitle = '';
   newSectionDescription = '';
-  newSectionDeepLink = '';
+
   selectedParentSection = '';
   currentSection: any = null;
 
@@ -223,7 +214,7 @@ export class ResourceManagementComponent implements OnInit {
     const rootSections = this.sections.filter(s => s.resourceId === resourceId && !s.parentSectionId);
     return rootSections.map(section => ({
       ...section,
-      subSections: this.sections.filter(s => s.parentSectionId === section.id)
+      subSections: this.sections.filter(s => s.parentSectionId === section.sectionId)
     }));
   }
 
@@ -231,10 +222,9 @@ export class ResourceManagementComponent implements OnInit {
     if (!this.newSectionTitle.trim()) return;
     
     const sectionData = {
-      parentSectionId: this.selectedParentSection || null,
+      parentSectionId: this.selectedParentSection ? parseInt(this.selectedParentSection) : null,
       title: this.newSectionTitle,
       description: this.newSectionDescription,
-      deepLink: this.newSectionDeepLink,
       sortOrder: 0
     };
 
@@ -244,10 +234,12 @@ export class ResourceManagementComponent implements OnInit {
           this.loadSections();
           this.newSectionTitle = '';
           this.newSectionDescription = '';
-          this.newSectionDeepLink = '';
           this.selectedParentSection = '';
         },
-        error: error => alert('Error adding section: ' + error.message)
+        error: error => {
+          console.error('Error adding section:', error);
+          alert('Error adding section: ' + (error.error?.message || error.message));
+        }
       });
   }
 
@@ -261,7 +253,6 @@ export class ResourceManagementComponent implements OnInit {
       parentSectionId: this.currentSection.parentSectionId,
       title: this.currentSection.title,
       description: this.currentSection.description,
-      deepLink: this.currentSection.deepLink,
       sortOrder: this.currentSection.sortOrder || 0
     };
     
