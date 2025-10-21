@@ -133,6 +133,15 @@ import { environment } from '../../../environments/environment';
             <input [(ngModel)]="currentSection.title" name="title" class="w-full border rounded px-3 py-2" required>
           </div>
           <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Parent Section</label>
+            <select [(ngModel)]="currentSection.parentSectionId" name="parentSectionId" class="w-full border rounded px-3 py-2">
+              <option [value]="null">Root Section</option>
+              <option *ngFor="let section of getAvailableParentSections(currentSection.resourceId, currentSection.sectionId)" [value]="section.sectionId">
+                {{section.title}}
+              </option>
+            </select>
+          </div>
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Section Description</label>
             <textarea [(ngModel)]="currentSection.description" name="description" rows="3" class="w-full border rounded px-3 py-2"></textarea>
           </div>
@@ -208,6 +217,14 @@ export class ResourceManagementComponent implements OnInit {
 
   getResourceSections(resourceId: number) {
     return this.sections.filter(s => s.resourceId === resourceId && !s.parentSectionId);
+  }
+
+  getAvailableParentSections(resourceId: number, currentSectionId: number) {
+    return this.sections.filter(s => 
+      s.resourceId === resourceId && 
+      s.sectionId !== currentSectionId &&
+      s.parentSectionId !== currentSectionId
+    );
   }
 
   getRootSections(resourceId: number) {
