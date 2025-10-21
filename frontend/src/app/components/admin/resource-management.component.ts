@@ -7,14 +7,13 @@ import { environment } from '../../../environments/environment';
   template: `
     <div class="p-6">
       <h2 class="text-2xl font-bold mb-6">Resource Management</h2>
-      
-      <!-- Resource List View -->
-      <div *ngIf="!showForm && !showSectionForm">
-        <div class="mb-4">
+      <div class="mb-4">
           <button (click)="addResource()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
             Add New Resource
           </button>
         </div>
+      <!-- Resource List View -->
+      <div *ngIf="!showForm && !showSectionForm">
         
         <div *ngFor="let resource of resources" class="mb-6">
           <div class="bg-white border rounded-lg">
