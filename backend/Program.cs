@@ -91,18 +91,8 @@ var app = builder.Build();
 // Initialize database, run migrations, and seed roles
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    
-    try
-    {
-        await dbContext.Database.MigrateAsync();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Migration failed: {ex.Message}. Skipping migration due to database corruption.");
-        // Skip migration entirely due to PostgreSQL catalog corruption
-        // The application will work without the short_description column
-    }
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    context.Database.Migrate();
     
     var dbInitService = scope.ServiceProvider.GetRequiredService<DatabaseInitializationService>();
     await dbInitService.InitializeAsync();
