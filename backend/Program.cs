@@ -92,7 +92,25 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await dbContext.Database.MigrateAsync();
+    
+    try
+    {
+        await dbContext.Database.MigrateAsync();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Migration failed: {ex.Message}. Attempting manual column addition.");
+        try
+        {
+            await dbContext.Database.ExecuteSqlRawAsync(
+                "ALTER TABLE resource_sections ADD COLUMN IF NOT EXISTS short_description VARCHAR(500);");
+            Console.WriteLine("Manual column addition successful.");
+        }
+        catch (Exception manualEx)
+        {
+            Console.WriteLine($"Manual migration also failed: {manualEx.Message}");
+        }
+    }
     
     var dbInitService = scope.ServiceProvider.GetRequiredService<DatabaseInitializationService>();
     await dbInitService.InitializeAsync();
