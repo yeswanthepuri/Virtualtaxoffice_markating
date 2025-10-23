@@ -121,6 +121,7 @@ namespace Backend.Controllers
                     ResourceId = resourceId,
                     ParentSectionId = request.ParentSectionId,
                     Title = request.Title,
+                    ShortDescription = request.ShortDescription,
                     Description = request.Description,
                     SortOrder = request.SortOrder
                 };
@@ -144,6 +145,7 @@ namespace Backend.Controllers
                 if (section == null) return NotFound();
                 
                 section.Title = request.Title;
+                section.ShortDescription = request.ShortDescription;
                 section.Description = request.Description;
                 section.SortOrder = request.SortOrder;
                 section.UpdatedAt = DateTime.UtcNow;
@@ -168,6 +170,7 @@ namespace Backend.Controllers
     {
         public long? ParentSectionId { get; set; }
         public string Title { get; set; } = string.Empty;
+        public string? ShortDescription { get; set; }
         public string? Description { get; set; }
         public int SortOrder { get; set; } = 0;
     }

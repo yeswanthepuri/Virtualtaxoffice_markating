@@ -12,8 +12,14 @@ import { environment } from '../../../environments/environment';
             Add New Resource
           </button>
         </div>
+      <!-- Loading State -->
+      <div *ngIf="isLoadingResources" class="flex justify-center items-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <span class="ml-2 text-gray-600">Loading resources...</span>
+      </div>
+
       <!-- Resource List View -->
-      <div *ngIf="!showForm && !showSectionForm">
+      <div *ngIf="!showForm && !showSectionForm && !isLoadingResources">
         
         <div *ngFor="let resource of resources" class="mb-6">
           <div class="bg-white border rounded-lg">
@@ -46,12 +52,16 @@ import { environment } from '../../../environments/environment';
                   </option>
                 </select>
               </div>
-              <textarea [(ngModel)]="newSectionDescription" placeholder="Section description (optional)" 
+              <input [(ngModel)]="newSectionShortDescription" placeholder="Short description (optional)" 
+                     class="w-full border rounded px-3 py-2 mb-3">
+              <textarea [(ngModel)]="newSectionDescription" placeholder="Detailed description (optional)" 
                        class="w-full border rounded px-3 py-2 mb-3" rows="2"></textarea>
 
               <button (click)="addSection(resource.resourceId)" 
-                      class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                Add Section
+                      [disabled]="isAddingSection"
+                      class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span *ngIf="isAddingSection" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block mr-2"></span>
+                {{isAddingSection ? 'Adding...' : 'Add Section'}}
               </button>
             </div>
             
@@ -63,8 +73,8 @@ import { environment } from '../../../environments/environment';
                   <div class="flex justify-between items-center p-2 hover:bg-gray-50">
                     <div class="flex-1">
                       <div class="font-medium">{{section.title}}</div>
+                      <div class="text-sm text-blue-600" *ngIf="section.shortDescription">{{section.shortDescription}}</div>
                       <div class="text-sm text-gray-600" *ngIf="section.description">{{section.description}}</div>
-
                     </div>
                     <button (click)="editSection(section)" class="text-green-500 hover:text-green-700 text-sm">Edit</button>
                   </div>
@@ -75,8 +85,8 @@ import { environment } from '../../../environments/environment';
                         <span class="text-blue-500 mr-2">•</span>
                         <div>
                           <div class="text-sm font-medium">{{subSection.title}}</div>
+                          <div class="text-xs text-blue-600" *ngIf="subSection.shortDescription">{{subSection.shortDescription}}</div>
                           <div class="text-xs text-gray-600" *ngIf="subSection.description">{{subSection.description}}</div>
-
                         </div>
                       </div>
                       <button (click)="editSection(subSection)" class="text-green-500 hover:text-green-700 text-xs">Edit</button>
@@ -110,8 +120,9 @@ import { environment } from '../../../environments/environment';
           </div>
 
           <div class="flex space-x-4">
-            <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
-              {{isEditing ? 'Update' : 'Create'}} Resource
+            <button type="submit" [disabled]="isSavingResource" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span *ngIf="isSavingResource" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block mr-2"></span>
+              {{isSavingResource ? 'Saving...' : (isEditing ? 'Update' : 'Create')}} Resource
             </button>
             <button type="button" (click)="cancelForm()" class="bg-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-400">
               Cancel
@@ -142,13 +153,18 @@ import { environment } from '../../../environments/environment';
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Section Description</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
+            <input [(ngModel)]="currentSection.shortDescription" name="shortDescription" class="w-full border rounded px-3 py-2">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Detailed Description</label>
             <textarea [(ngModel)]="currentSection.description" name="description" rows="3" class="w-full border rounded px-3 py-2"></textarea>
           </div>
 
           <div class="flex space-x-4">
-            <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
-              Update Section
+            <button type="submit" [disabled]="isUpdatingSection" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span *ngIf="isUpdatingSection" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block mr-2"></span>
+              {{isUpdatingSection ? 'Updating...' : 'Update'}} Section
             </button>
             <button type="button" (click)="cancelSectionForm()" class="bg-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-400">
               Cancel
@@ -180,10 +196,17 @@ export class ResourceManagementComponent implements OnInit {
   sections: any[] = [];
   showSectionForm = false;
   newSectionTitle = '';
+  newSectionShortDescription = '';
   newSectionDescription = '';
 
   selectedParentSection = '';
   currentSection: any = null;
+  
+  isLoadingResources = false;
+  isLoadingSections = false;
+  isAddingSection = false;
+  isUpdatingSection = false;
+  isSavingResource = false;
 
   ngOnInit() {
     this.loadResources();
@@ -191,20 +214,32 @@ export class ResourceManagementComponent implements OnInit {
   }
 
   loadResources() {
+    this.isLoadingResources = true;
     this.http.get<any[]>(`${environment.apiUrl}/resource`)
       .subscribe({
         next: data => {
           this.resources = data.map(r => ({...r, showSections: false}));
+          this.isLoadingResources = false;
         },
-        error: error => console.error('Error loading resources:', error)
+        error: error => {
+          console.error('Error loading resources:', error);
+          this.isLoadingResources = false;
+        }
       });
   }
 
   loadSections() {
+    this.isLoadingSections = true;
     this.http.get<any[]>(`${environment.apiUrl}/resource/sections`)
       .subscribe({
-        next: data => this.sections = data,
-        error: error => console.error('Error loading sections:', error)
+        next: data => {
+          this.sections = data;
+          this.isLoadingSections = false;
+        },
+        error: error => {
+          console.error('Error loading sections:', error);
+          this.isLoadingSections = false;
+        }
       });
   }
 
@@ -238,9 +273,11 @@ export class ResourceManagementComponent implements OnInit {
   addSection(resourceId: number) {
     if (!this.newSectionTitle.trim()) return;
     
+    this.isAddingSection = true;
     const sectionData = {
       parentSectionId: this.selectedParentSection ? parseInt(this.selectedParentSection) : null,
       title: this.newSectionTitle,
+      shortDescription: this.newSectionShortDescription,
       description: this.newSectionDescription,
       sortOrder: 0
     };
@@ -250,12 +287,15 @@ export class ResourceManagementComponent implements OnInit {
         next: () => {
           this.loadSections();
           this.newSectionTitle = '';
+          this.newSectionShortDescription = '';
           this.newSectionDescription = '';
           this.selectedParentSection = '';
+          this.isAddingSection = false;
         },
         error: error => {
           console.error('Error adding section:', error);
           alert('Error adding section: ' + (error.error?.message || error.message));
+          this.isAddingSection = false;
         }
       });
   }
@@ -266,9 +306,11 @@ export class ResourceManagementComponent implements OnInit {
   }
 
   updateSection() {
+    this.isUpdatingSection = true;
     const sectionData = {
       parentSectionId: this.currentSection.parentSectionId,
       title: this.currentSection.title,
+      shortDescription: this.currentSection.shortDescription,
       description: this.currentSection.description,
       sortOrder: this.currentSection.sortOrder || 0
     };
@@ -278,8 +320,12 @@ export class ResourceManagementComponent implements OnInit {
         next: () => {
           this.loadSections();
           this.cancelSectionForm();
+          this.isUpdatingSection = false;
         },
-        error: error => alert('Error updating section: ' + error.message)
+        error: error => {
+          alert('Error updating section: ' + error.message);
+          this.isUpdatingSection = false;
+        }
       });
   }
 
@@ -312,6 +358,7 @@ export class ResourceManagementComponent implements OnInit {
   }
 
   saveResourceWithData(jsonData: string | null) {
+    this.isSavingResource = true;
     const resourceData = {
       title: this.currentResource.title,
       description: this.currentResource.description
@@ -326,8 +373,12 @@ export class ResourceManagementComponent implements OnInit {
         alert('Resource saved successfully!');
         this.loadResources();
         this.cancelForm();
+        this.isSavingResource = false;
       },
-      error: error => alert('Error saving resource: ' + error.message)
+      error: error => {
+        alert('Error saving resource: ' + error.message);
+        this.isSavingResource = false;
+      }
     });
   }
 

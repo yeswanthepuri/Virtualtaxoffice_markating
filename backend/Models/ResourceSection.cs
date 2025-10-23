@@ -21,6 +21,10 @@ namespace Backend.Models
         [MaxLength(255)]
         public string Title { get; set; } = string.Empty;
         
+        [MaxLength(500)]
+        [Column("short_description")]
+        public string? ShortDescription { get; set; }
+        
         public string? Description { get; set; }
         
         [Column("sort_order")]
