@@ -88,9 +88,12 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// // Initialize database and seed roles
+// Initialize database, run migrations, and seed roles
 using (var scope = app.Services.CreateScope())
 {
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await dbContext.Database.MigrateAsync();
+    
     var dbInitService = scope.ServiceProvider.GetRequiredService<DatabaseInitializationService>();
     await dbInitService.InitializeAsync();
 }
