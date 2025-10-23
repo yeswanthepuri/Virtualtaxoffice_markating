@@ -92,7 +92,14 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    context.Database.Migrate();
+    try
+    {
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Migration failed due to database corruption: {ex.Message}");
+    }
     
     var dbInitService = scope.ServiceProvider.GetRequiredService<DatabaseInitializationService>();
     await dbInitService.InitializeAsync();
