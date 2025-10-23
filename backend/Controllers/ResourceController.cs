@@ -97,7 +97,38 @@ namespace Backend.Controllers
         [HttpGet("sections")]
         public async Task<ActionResult<IEnumerable<ResourceSection>>> GetAllSections()
         {
-            return await _context.ResourceSections.ToListAsync();
+            try
+            {
+                return await _context.ResourceSections.ToListAsync();
+            }
+            catch (Exception ex) when (ex.Message.Contains("short_description") || ex.Message.Contains("pg_attribute"))
+            {
+                // Column doesn't exist yet, use raw SQL without short_description
+                var sections = await _context.ResourceSections
+                    .FromSqlRaw("SELECT section_id, resource_id, parent_section_id, title, description, sort_order, created_at, updated_at FROM resource_sections")
+                    .ToListAsync();
+                return sections;
+            }
+        }
+
+        [HttpGet("sections/{sectionId}")]
+        public async Task<ActionResult<ResourceSection>> GetSection(long sectionId)
+        {
+            try
+            {
+                var section = await _context.ResourceSections.FindAsync(sectionId);
+                if (section == null) return NotFound();
+                return section;
+            }
+            catch (Exception ex) when (ex.Message.Contains("short_description") || ex.Message.Contains("pg_attribute"))
+            {
+                // Column doesn't exist yet, use raw SQL without short_description
+                var section = await _context.ResourceSections
+                    .FromSqlRaw("SELECT section_id, resource_id, parent_section_id, title, description, sort_order, created_at, updated_at FROM resource_sections WHERE section_id = {0}", sectionId)
+                    .FirstOrDefaultAsync();
+                if (section == null) return NotFound();
+                return section;
+            }
         }
 
         [HttpPost("{resourceId}/sections")]
@@ -121,16 +152,30 @@ namespace Backend.Controllers
                     ResourceId = resourceId,
                     ParentSectionId = request.ParentSectionId,
                     Title = request.Title,
+                    ShortDescription = request.ShortDescription,
                     Description = request.Description,
                     SortOrder = request.SortOrder
                 };
                 
-                // Only set ShortDescription if the property exists (after migration)
-                try { section.ShortDescription = request.ShortDescription; } catch { }
-                
                 _context.ResourceSections.Add(section);
                 await _context.SaveChangesAsync();
                 return CreatedAtAction(nameof(GetResource), new { id = resourceId }, section);
+            }
+            catch (Exception ex) when (ex.Message.Contains("short_description") || ex.Message.Contains("pg_attribute"))
+            {
+                // Try without ShortDescription if column doesn't exist
+                var sectionWithoutShort = new ResourceSection
+                {
+                    ResourceId = resourceId,
+                    ParentSectionId = request.ParentSectionId,
+                    Title = request.Title,
+                    Description = request.Description,
+                    SortOrder = request.SortOrder
+                };
+                
+                _context.ResourceSections.Add(sectionWithoutShort);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction(nameof(GetResource), new { id = resourceId }, sectionWithoutShort);
             }
             catch (Exception ex)
             {
@@ -147,11 +192,25 @@ namespace Backend.Controllers
                 if (section == null) return NotFound();
                 
                 section.Title = request.Title;
+                section.ShortDescription = request.ShortDescription;
                 section.Description = request.Description;
                 section.SortOrder = request.SortOrder;
+                section.UpdatedAt = DateTime.UtcNow;
                 
-                // Only set ShortDescription if the property exists (after migration)
-                try { section.ShortDescription = request.ShortDescription; } catch { }
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (Exception ex) when (ex.Message.Contains("short_description") || ex.Message.Contains("pg_attribute"))
+            {
+                // Try without ShortDescription if column doesn't exist
+                var section = await _context.ResourceSections
+                    .FromSqlRaw("SELECT section_id, resource_id, parent_section_id, title, description, sort_order, created_at, updated_at FROM resource_sections WHERE section_id = {0}", sectionId)
+                    .FirstOrDefaultAsync();
+                if (section == null) return NotFound();
+                
+                section.Title = request.Title;
+                section.Description = request.Description;
+                section.SortOrder = request.SortOrder;
                 section.UpdatedAt = DateTime.UtcNow;
                 
                 await _context.SaveChangesAsync();
