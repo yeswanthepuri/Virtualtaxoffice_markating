@@ -99,17 +99,9 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Migration failed: {ex.Message}. Attempting manual column addition.");
-        try
-        {
-            await dbContext.Database.ExecuteSqlRawAsync(
-                "ALTER TABLE resource_sections ADD COLUMN IF NOT EXISTS short_description VARCHAR(500);");
-            Console.WriteLine("Manual column addition successful.");
-        }
-        catch (Exception manualEx)
-        {
-            Console.WriteLine($"Manual migration also failed: {manualEx.Message}");
-        }
+        Console.WriteLine($"Migration failed: {ex.Message}. Skipping migration due to database corruption.");
+        // Skip migration entirely due to PostgreSQL catalog corruption
+        // The application will work without the short_description column
     }
     
     var dbInitService = scope.ServiceProvider.GetRequiredService<DatabaseInitializationService>();

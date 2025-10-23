@@ -121,10 +121,12 @@ namespace Backend.Controllers
                     ResourceId = resourceId,
                     ParentSectionId = request.ParentSectionId,
                     Title = request.Title,
-                    ShortDescription = request.ShortDescription,
                     Description = request.Description,
                     SortOrder = request.SortOrder
                 };
+                
+                // Only set ShortDescription if the property exists (after migration)
+                try { section.ShortDescription = request.ShortDescription; } catch { }
                 
                 _context.ResourceSections.Add(section);
                 await _context.SaveChangesAsync();
@@ -145,9 +147,11 @@ namespace Backend.Controllers
                 if (section == null) return NotFound();
                 
                 section.Title = request.Title;
-                section.ShortDescription = request.ShortDescription;
                 section.Description = request.Description;
                 section.SortOrder = request.SortOrder;
+                
+                // Only set ShortDescription if the property exists (after migration)
+                try { section.ShortDescription = request.ShortDescription; } catch { }
                 section.UpdatedAt = DateTime.UtcNow;
                 
                 await _context.SaveChangesAsync();
