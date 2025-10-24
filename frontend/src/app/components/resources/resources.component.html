@@ -10,8 +10,14 @@
       </p>
     </div>
 
-    <!-- Resources with Async Pipe -->
-    <div *ngIf="resources$ | async as resources; else loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <span class="ml-4 text-gray-600 text-lg">Loading resources...</span>
+    </div>
+
+    <!-- Resources Grid -->
+    <div *ngIf="!isLoading && resources.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       <div *ngFor="let resource of resources" 
            class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 overflow-hidden border border-gray-100">
         
@@ -45,28 +51,20 @@
           </button>
         </div>
       </div>
-      
-      <!-- Empty State -->
-      <div *ngIf="resources.length === 0" class="col-span-full text-center py-20">
-        <div class="bg-white rounded-2xl shadow-lg p-12 max-w-md mx-auto">
-          <div class="bg-blue-100 rounded-full p-6 w-24 h-24 mx-auto mb-6">
-            <svg class="w-12 h-12 text-blue-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-          </div>
-          <h3 class="text-2xl font-bold text-gray-800 mb-4">Resources Coming Soon</h3>
-          <p class="text-gray-600">We're preparing comprehensive tax resources and guides for you. Check back soon!</p>
-        </div>
-      </div>
     </div>
 
-    <!-- Loading Template -->
-    <ng-template #loading>
-      <div class="flex justify-center items-center py-20">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        <span class="ml-4 text-gray-600 text-lg">Loading resources...</span>
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && resources.length === 0" class="text-center py-20">
+      <div class="bg-white rounded-2xl shadow-lg p-12 max-w-md mx-auto">
+        <div class="bg-blue-100 rounded-full p-6 w-24 h-24 mx-auto mb-6">
+          <svg class="w-12 h-12 text-blue-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">Resources Coming Soon</h3>
+        <p class="text-gray-600">We're preparing comprehensive tax resources and guides for you. Check back soon!</p>
       </div>
-    </ng-template>
+    </div>
   </div>
 </section>
 
