@@ -16,15 +16,6 @@
       <span class="ml-4 text-gray-600 text-lg">Loading resources...</span>
     </div>
 
-    <!-- Debug Data -->
-    <div class="mb-4 p-4 bg-yellow-100 rounded">
-      <p>Resources count: {{resources.length}}</p>
-      <p>Loading: {{isLoading}}</p>
-      <div *ngFor="let resource of resources">
-        <p>Title: {{resource.title}}</p>
-        <p>Description: {{resource.description}}</p>
-      </div>
-    </div>
 
     <!-- Resources Grid -->
     <div *ngIf="!isLoading && resources.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
