@@ -26,6 +26,7 @@ import { LocationMaintenanceComponent } from './components/admin/location-mainte
 import { PartnersComponent } from './components/partners/partners.component';
 import { PublicRegisterComponent } from './components/public-register/public-register.component';
 import { ResourcesComponent } from './components/home/resources.component';
+import { CommonModule } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -51,6 +52,7 @@ import { ResourcesComponent } from './components/home/resources.component';
   ],
   imports: [
     BrowserModule,
+    CommonModule,
     BrowserAnimationsModule,
     HttpClientModule,
     FormsModule,
