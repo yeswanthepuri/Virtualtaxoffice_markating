@@ -10,6 +10,13 @@
       </p>
     </div>
 
+    <!-- Debug Info -->
+    <div class="mb-4 p-4 bg-yellow-100 rounded">
+      <p>Loading: {{isLoading}}</p>
+      <p>Resources count: {{resources.length}}</p>
+      <p>Resources: {{resources | json}}</p>
+    </div>
+
     <!-- Loading State -->
     <div *ngIf="isLoading" class="flex justify-center items-center py-20">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>

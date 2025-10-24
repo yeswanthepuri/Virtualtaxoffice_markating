@@ -18,9 +18,11 @@ export class ResourcesComponent implements OnInit {
   }
 
   loadResources() {
+    console.log('Loading resources from:', `${environment.apiUrl}/resource/published`);
     this.http.get<any[]>(`${environment.apiUrl}/resource/published`)
       .subscribe({
         next: (data) => {
+          console.log('Resources received:', data);
           this.resources = data;
           this.isLoading = false;
         },
