@@ -18,7 +18,12 @@
 
     <!-- Debug Data -->
     <div class="mb-4 p-4 bg-yellow-100 rounded">
-      <pre>{{resources | json}}</pre>
+      <p>Resources count: {{resources.length}}</p>
+      <p>Loading: {{isLoading}}</p>
+      <div *ngFor="let resource of resources">
+        <p>Title: {{resource.title}}</p>
+        <p>Description: {{resource.description}}</p>
+      </div>
     </div>
 
     <!-- Resources Grid -->
@@ -72,4 +77,3 @@
     </div>
   </div>
 </section>
-

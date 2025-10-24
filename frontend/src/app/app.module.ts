@@ -25,8 +25,8 @@ import { CacheManagementComponent } from './components/admin/cache-management.co
 import { LocationMaintenanceComponent } from './components/admin/location-maintenance.component';
 import { PartnersComponent } from './components/partners/partners.component';
 import { PublicRegisterComponent } from './components/public-register/public-register.component';
-import { ResourcesComponent } from './components/home/resources.component';
-import { CommonModule } from '@angular/common';
+import { ResourcesComponent } from './components/resources/resources.component';
+import { CommonModule, JsonPipe } from '@angular/common';
 
 @NgModule({
   declarations: [
