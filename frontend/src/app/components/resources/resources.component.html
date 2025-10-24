@@ -17,32 +17,15 @@
     </div>
 
 
-    <!-- Resources Grid -->
-    <div *ngIf="!isLoading && resources.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <div *ngFor="let resource of resources" 
-           class="group relative bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 hover:scale-[1.02] overflow-hidden border border-gray-200 hover:border-blue-300 cursor-pointer">
-        
-        <!-- Animated Background Gradient -->
-        <div class="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        
-        <!-- Floating Elements -->
-        <div class="absolute top-4 right-4 w-2 h-2 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-pulse transition-all duration-700"></div>
-        <div class="absolute top-8 right-8 w-1 h-1 bg-indigo-400 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-bounce transition-all duration-1000"></div>
-        
-        <!-- Card Content -->
-        <div class="relative z-10 p-8">
-          <h3 class="text-2xl font-bold text-blue-600 mb-4 group-hover:text-blue-700 transition-all duration-300 group-hover:translate-x-1">
-            {{resource.title}}
-            <div class="w-0 group-hover:w-12 h-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500 mt-2"></div>
-          </h3>
-          
-          <p class="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300 overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
-            {{resource.description || 'Comprehensive resource covering important tax topics and strategies for your business needs.'}}
-          </p>
-        </div>
-
-        <!-- Bottom Accent Line -->
-        <div class="absolute bottom-0 left-0 w-0 group-hover:w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-700 ease-out"></div>
+    <!-- Resources List -->
+    <div *ngIf="!isLoading && resources.length > 0" class="space-y-6">
+      <div *ngFor="let resource of resources" class="group">
+        <h3 class="text-xl font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-200 cursor-pointer">
+          {{resource.title}}
+        </h3>
+        <p class="text-gray-600 mt-2">
+          {{resource.description || 'Comprehensive resource covering important tax topics and strategies.'}}
+        </p>
       </div>
     </div>
 
