@@ -21,11 +21,12 @@ export class ResourcesComponent implements OnInit {
     this.http.get<any[]>(`${environment.apiUrl}/resource/published`)
       .subscribe({
         next: (data) => {
-          this.resources = data;
+          this.resources = data || [];
           this.isLoading = false;
         },
         error: (error) => {
           console.error('Error loading resources:', error);
+          this.resources = [];
           this.isLoading = false;
         }
       });

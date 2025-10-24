@@ -1,70 +1,35 @@
-<section class="pt-24 pb-16 bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Header Section -->
-    <div class="text-center mb-16">
-      <h1 class="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-6">
-        Tax Resources
-      </h1>
-      <p class="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
-        Comprehensive guides, tools, and resources to help you navigate tax planning, compliance, and optimization strategies for your business and personal finances.
+<div class="min-h-screen bg-gray-50 py-12">
+  <div class="max-w-6xl mx-auto px-4">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">Tax Resources</h1>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        Essential guides and tools for tax planning and compliance
       </p>
     </div>
 
-    <!-- Loading State -->
-    <div *ngIf="isLoading" class="flex justify-center items-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      <span class="ml-4 text-gray-600 text-lg">Loading resources...</span>
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="flex justify-center py-16">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>
 
-    <!-- Resources Grid -->
-    <div *ngIf="!isLoading && resources.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <!-- Resources -->
+    <div *ngIf="!isLoading && resources.length > 0" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div *ngFor="let resource of resources" 
-           class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 overflow-hidden border border-gray-100">
-        
-        <!-- Card Header -->
-        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6">
-          <div class="flex items-center justify-between">
-            <div class="bg-white/20 rounded-full p-3">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card Content -->
-        <div class="p-6">
-          <h3 class="text-xl font-bold text-gray-800 mb-3 group-hover:text-blue-600 transition-colors duration-200">
-            {{resource.title}}
-          </h3>
-          
-          <p class="text-gray-600 mb-4 overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
-            {{resource.description || 'Comprehensive resource covering important tax topics and strategies.'}}
-          </p>
-
-          <!-- Action Button -->
-          <button class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-            Explore Resource
-            <svg class="w-4 h-4 ml-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </button>
-        </div>
+           class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border">
+        <h3 class="text-xl font-semibold text-gray-900 mb-3">{{resource.title}}</h3>
+        <p class="text-gray-600 mb-4">{{resource.description}}</p>
+        <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+          View Resource
+        </button>
       </div>
     </div>
 
     <!-- Empty State -->
-    <div *ngIf="!isLoading && resources.length === 0" class="text-center py-20">
-      <div class="bg-white rounded-2xl shadow-lg p-12 max-w-md mx-auto">
-        <div class="bg-blue-100 rounded-full p-6 w-24 h-24 mx-auto mb-6">
-          <svg class="w-12 h-12 text-blue-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-        </div>
-        <h3 class="text-2xl font-bold text-gray-800 mb-4">Resources Coming Soon</h3>
-        <p class="text-gray-600">We're preparing comprehensive tax resources and guides for you. Check back soon!</p>
-      </div>
+    <div *ngIf="!isLoading && resources.length === 0" class="text-center py-16">
+      <h3 class="text-xl font-semibold text-gray-900 mb-2">No Resources Available</h3>
+      <p class="text-gray-600">Resources will be available soon.</p>
     </div>
   </div>
-</section>
+</div>
 
