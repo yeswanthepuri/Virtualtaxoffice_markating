@@ -31,33 +31,14 @@
         
         <!-- Card Content -->
         <div class="relative z-10 p-8">
-          <!-- Icon with Glow Effect -->
-          <div class="mb-6 relative">
-            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg group-hover:shadow-blue-500/25">
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-            </div>
-            <!-- Glow Ring -->
-            <div class="absolute inset-0 w-16 h-16 bg-blue-400 rounded-2xl opacity-0 group-hover:opacity-20 group-hover:scale-125 transition-all duration-500 blur-md"></div>
-          </div>
-
-          <h3 class="text-2xl font-bold text-gray-800 mb-4 group-hover:text-blue-600 transition-all duration-300 group-hover:translate-x-1">
+          <h3 class="text-2xl font-bold text-blue-600 mb-4 group-hover:text-blue-700 transition-all duration-300 group-hover:translate-x-1">
             {{resource.title}}
             <div class="w-0 group-hover:w-12 h-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500 mt-2"></div>
           </h3>
           
-          <p class="text-gray-600 mb-6 leading-relaxed group-hover:text-gray-700 transition-colors duration-300 overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
+          <p class="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300 overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
             {{resource.description || 'Comprehensive resource covering important tax topics and strategies for your business needs.'}}
           </p>
-
-          <!-- Enhanced Action Link -->
-          <div class="flex items-center text-blue-600 font-semibold group-hover:text-blue-700 transition-all duration-300">
-            <span class="group-hover:translate-x-2 transition-transform duration-300">Explore Resource</span>
-            <svg class="w-5 h-5 ml-2 group-hover:translate-x-2 group-hover:scale-110 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-            </svg>
-          </div>
         </div>
 
         <!-- Bottom Accent Line -->
